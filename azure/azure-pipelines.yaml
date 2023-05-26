@@ -5,8 +5,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  kubernetesServiceConnection: Airflow-DEV-uni-apps-aks-dev-ictd-oi-airflow-dev-1684231707730
-  kubernetesNamespace: ictd-oi-airflow-dev
+  kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
+  kubernetesNamespace: ictd-oi-datahub-dev
 
 steps:
 - task: HelmDeploy@0
@@ -32,15 +32,14 @@ steps:
 
 
 - task: HelmDeploy@0
-  displayName: Helm deploy Airflow
+  displayName: Helm deploy Datahub
   inputs:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: upgrade
+    command: install
     chartType: Name
-    chartName: apache-airflow/airflow
-    releaseName: apache-airflow
-    arguments: '--set-string "env[0].name=AIRFLOW__CORE__LOAD_EXAMPLES" --set-string "env[0].value=True"'
+    chartName: datahub/datahub
+    releaseName: datahub
     namespace: $(kubernetesNamespace)
 
 #- task: Kubernetes@1
