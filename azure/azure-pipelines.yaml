@@ -26,17 +26,17 @@ steps:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
     command: 'install'
-    arguments: 'prerequisites datahub/datahub-prerequisites'
+    chartType: Name
+    chartName: datahub/datahub-prerequisites
+    releaseName: prerequisites
     namespace: $(kubernetesNamespace)
-
-
 
 - task: HelmDeploy@0
   displayName: Helm deploy Datahub
   inputs:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: install
+    command: 'install'
     chartType: Name
     chartName: datahub/datahub
     releaseName: datahub
