@@ -1,0 +1,53 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  kubernetesServiceConnection: Airflow-DEV-uni-apps-aks-dev-ictd-oi-airflow-dev-1684231707730
+  kubernetesNamespace: ictd-oi-airflow-dev
+
+steps:
+- task: HelmDeploy@0
+  displayName: 'Add Datahub Helm Repo'
+  enabled: true
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'repo'
+    arguments: 'add datahub https://helm.datahubproject.io/'
+    namespace: $(kubernetesNamespace)
+
+- task: HelmDeploy@0
+  displayName: 'Add Deploy Datahub Prerequisites'
+  enabled: true
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'install'
+    arguments: 'prerequisites datahub/datahub-prerequisites'
+    namespace: $(kubernetesNamespace)
+
+
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Airflow
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: upgrade
+    chartType: Name
+    chartName: apache-airflow/airflow
+    releaseName: apache-airflow
+    arguments: '--set-string "env[0].name=AIRFLOW__CORE__LOAD_EXAMPLES" --set-string "env[0].value=True"'
+    namespace: $(kubernetesNamespace)
+
+#- task: Kubernetes@1
+#  displayName: Set up Ingress
+#  inputs:
+#    connectionType: Kubernetes Service Connection
+#    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+#    command: apply
+#    arguments: '-f azure/ingress.yaml'
+#    namespace: $(kubernetesNamespace)
