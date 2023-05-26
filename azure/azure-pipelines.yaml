@@ -13,16 +13,17 @@ variables:
 steps:
 - task: Kubernetes@1
   displayName: Create secret for MySQL password
+  continueOnError: true
   inputs:
     connectionType: 'Kubernetes Service Connection'
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
     command: create
     arguments: "secret generic mysql-secrets --from-literal=mysql-root-password=$(mysqlPass)"
     namespace: $(kubernetesNamespace)
-    continueOnError: true
 
 - task: Kubernetes@1
   displayName: Create secret for Neo4j password
+  continueOnError: true
   inputs:
     connectionType: 'Kubernetes Service Connection'
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
@@ -43,6 +44,7 @@ steps:
 - task: HelmDeploy@0
   displayName: 'Add Deploy Datahub Prerequisites'
   enabled: true
+  continueOnError: true
   inputs:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
