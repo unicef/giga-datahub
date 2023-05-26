@@ -1,0 +1,28 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
+  kubernetesNamespace: ictd-oi-datahub-dev
+
+steps:
+- task: HelmDeploy@0
+  displayName: 'Delete Datahub Helm Prerequisites'
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'uninstall'
+    arguments: 'prerequisites'
+    namespace: $(kubernetesNamespace)
+
+- task: HelmDeploy@0
+  displayName: 'Delete Datahub Helm'
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'uninstall'
+    arguments: 'datahub'
+    namespace: $(kubernetesNamespace)
