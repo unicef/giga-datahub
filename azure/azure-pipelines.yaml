@@ -19,16 +19,7 @@ steps:
     command: create
     arguments: "secret generic mysql-secrets --from-literal=mysql-root-password=$(mysqlPass)"
     namespace: $(kubernetesNamespace)
-
-- task: HelmDeploy@0
-  displayName: 'UninstallDatahub Prerequisites'
-  enabled: true
-  inputs:
-    connectionType: Kubernetes Service Connection
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: 'uninstall'
-    arguments: 'prerequisites'
-    namespace: $(kubernetesNamespace)
+    continueOnError: true
 
 - task: Kubernetes@1
   displayName: Create secret for Neo4j password
