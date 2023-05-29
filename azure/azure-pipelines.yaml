@@ -48,7 +48,7 @@ steps:
   inputs:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: 'install'
+    command: 'upgrade'
     chartType: Name
     chartName: datahub/datahub-prerequisites
     releaseName: prerequisites
@@ -59,11 +59,12 @@ steps:
   inputs:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: 'install'
+    command: 'upgrade'
     chartType: Name
     chartName: datahub/datahub
     releaseName: datahub
     namespace: $(kubernetesNamespace)
+    arguments: "--values helm/datahub-frontend-values.yaml --values datahub-gms-values.yaml"
 
 #- task: Kubernetes@1
 #  displayName: Set up Ingress
