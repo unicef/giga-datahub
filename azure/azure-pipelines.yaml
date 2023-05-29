@@ -9,6 +9,7 @@ variables:
   kubernetesNamespace: ictd-oi-datahub-dev
   mysqlPass: $(MYSQL_PASS)
   neo4jPass: $(NEO4J_PASS)
+  system.debug: true
 
 steps:
 - task: Kubernetes@1
@@ -33,7 +34,6 @@ steps:
 
 - task: HelmDeploy@0
   displayName: 'Add Datahub Helm Repo'
-  enabled: true
   inputs:
     connectionType: Kubernetes Service Connection
     kubernetesServiceEndpoint: $(kubernetesServiceConnection)
