@@ -42,7 +42,7 @@ steps:
     namespace: $(kubernetesNamespace)
 
 - task: HelmDeploy@0
-  displayName: 'Add Deploy Datahub Prerequisites'
+  displayName: 'Deploy Datahub Prerequisites'
   enabled: true
   continueOnError: true
   inputs:
