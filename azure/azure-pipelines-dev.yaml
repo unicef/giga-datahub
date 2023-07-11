@@ -1,0 +1,77 @@
+trigger:
+- dev
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
+  kubernetesNamespace: ictd-oi-datahub-dev
+  mysqlPass: $(MYSQL_PASS)
+  neo4jPass: $(NEO4J_PASS)
+  system.debug: true
+
+steps:
+- task: Kubernetes@1
+  displayName: Create secret for MySQL password
+  continueOnError: true
+  inputs:
+    connectionType: 'Kubernetes Service Connection'
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: create
+    arguments: "secret generic mysql-secrets --from-literal=mysql-root-password=$(mysqlPass)"
+    namespace: $(kubernetesNamespace)
+
+- task: Kubernetes@1
+  displayName: Create secret for Neo4j password
+  continueOnError: true
+  inputs:
+    connectionType: 'Kubernetes Service Connection'
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: create
+    arguments: "secret generic neo4j-secrets --from-literal=neo4j-password=$(neo4jPass)"
+    namespace: $(kubernetesNamespace)
+
+- task: HelmDeploy@0
+  displayName: 'Add Datahub Helm Repo'
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'repo'
+    arguments: 'add datahub https://helm.datahubproject.io/'
+    namespace: $(kubernetesNamespace)
+
+- task: HelmDeploy@0
+  displayName: 'Deploy Datahub Prerequisites'
+  enabled: true
+  continueOnError: true
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'upgrade'
+    chartType: Name
+    chartName: datahub/datahub-prerequisites
+    releaseName: prerequisites
+    namespace: $(kubernetesNamespace)
+
+- task: HelmDeploy@0
+  displayName: Helm deploy Datahub
+  inputs:
+    connectionType: Kubernetes Service Connection
+    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+    command: 'upgrade'
+    chartType: Name
+    chartName: datahub/datahub
+    releaseName: datahub
+    namespace: $(kubernetesNamespace)
+    chartVersion: 0.2.164
+    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 20m"
+
+#- task: Kubernetes@1
+#  displayName: Set up Ingress
+#  inputs:
+#    connectionType: Kubernetes Service Connection
+#    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+#    command: apply
+#    arguments: '-f azure/ingress.yaml'
+#    namespace: $(kubernetesNamespace)
