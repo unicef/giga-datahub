@@ -53,7 +53,7 @@ steps:
     chartName: datahub/datahub-prerequisites
     releaseName: prerequisites
     namespace: $(kubernetesNamespace)
-    arguments: "--values helm/prerequisites-values.yaml"
+#    arguments: "--values helm/prerequisites-values.yaml"
 
 - task: HelmDeploy@0
   displayName: Helm deploy Datahub
@@ -66,7 +66,7 @@ steps:
     releaseName: datahub
     namespace: $(kubernetesNamespace)
     chartVersion: 0.2.164
-    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 30m"
+#    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 30m"
 
 #- task: Kubernetes@1
 #  displayName: Set up Ingress
