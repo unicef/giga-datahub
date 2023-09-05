@@ -65,7 +65,6 @@ steps:
     chartName: datahub/datahub
     releaseName: datahub
     namespace: $(kubernetesNamespace)
-    chartVersion: 0.2.164
     arguments: "--timeout 30m"
 #    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 30m"
 
