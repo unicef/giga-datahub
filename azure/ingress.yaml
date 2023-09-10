@@ -15,6 +15,6 @@ spec:
         pathType: Exact
         backend:
           service:
-            name: superset
+            name: datahub-datahub-frontend
             port:
-              number: 8088
+              number: 9002
