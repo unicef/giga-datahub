@@ -53,6 +53,7 @@ steps:
     chartName: datahub/datahub-prerequisites
     releaseName: prerequisites
     namespace: $(kubernetesNamespace)
+    arguments: "--install"
 #    arguments: "--values helm/prerequisites-values.yaml"
 
 - task: HelmDeploy@0
@@ -65,7 +66,7 @@ steps:
     chartName: datahub/datahub
     releaseName: datahub
     namespace: $(kubernetesNamespace)
-    arguments: "--timeout 1h"
+    arguments: "--install --timeout 1h"
 #    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 1h"
 
 - task: Kubernetes@1
