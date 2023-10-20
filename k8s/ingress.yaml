@@ -8,13 +8,13 @@ metadata:
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
-  - host: io-datahub-dev.unitst.org
-    http:
-      paths:
-      - path: /
-        pathType: Exact
-        backend:
-          service:
-            name: datahub-datahub-frontend
-            port:
-              number: 9002
+    - host: io-datahub-dev.unitst.org
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: datahub-datahub-frontend
+                port:
+                  number: 9002

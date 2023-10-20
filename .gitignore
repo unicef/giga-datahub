@@ -1,2 +1,5 @@
 # Pycharm
 .idea
+
+secrets.yaml
+.env
