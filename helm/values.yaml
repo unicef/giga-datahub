@@ -4,15 +4,13 @@ datahub-gms:
   enabled: true
   image:
     repository: linkedin/datahub-gms
-    # tag: "v0.10.0 # defaults to .global.datahub.version
+    # tag: "v0.11.0 # defaults to .global.datahub.version
   resources:
     limits:
       memory: 2Gi
     requests:
       cpu: 100m
       memory: 1Gi
-  service:
-    type: NodePort
   # Optionally set a GMS specific SQL login (defaults to global login)
   # sql:
   #   datasource:
@@ -25,7 +23,7 @@ datahub-frontend:
   enabled: true
   image:
     repository: linkedin/datahub-frontend-react
-    # tag: "v0.10.0" # # defaults to .global.datahub.version
+    # tag: "v0.11.0" # # defaults to .global.datahub.version
   resources:
     limits:
       memory: 1400Mi
@@ -35,14 +33,41 @@ datahub-frontend:
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
-  defaultUserCredentials: {}
+    extraLabels: { }
+    annotations: { }
+    hosts:
+      - host: ""
+        paths: [ ]
+        redirectPaths: [ ]
+    tls: [ ]
+  defaultUserCredentials: { }
   service:
-    type: NodePort
+    type: LoadBalancer
   #  randomAdminPassword: true
   #  # You can also set specific passwords for default users
   #  # manualValues: |
   #  #   datahub:manualPassword
   #  #   initialViewer:manualPassword
+  extraVolumes:
+    - name: datahub-users
+      secret:
+        defaultMode: 0444
+        secretName: datahub-users-secret
+  extraVolumeMounts:
+    - name: datahub-users
+      mountPath: /datahub-frontend/conf/user.props
+      subPath: user.props
+  auth:
+    sessionTTLHours: "24"
+  oidcAuthentication:
+    enabled: true
+    provider: azure
+    clientId: ""
+    clientSecretRef:
+      secretRef: giga-datahub
+      secretKey: AUTH_OIDC_CLIENT_SECRET
+    azureTenantId: ""
+    scope: "openid profile email"
 
 acryl-datahub-actions:
   enabled: true
@@ -63,7 +88,7 @@ acryl-datahub-actions:
 datahub-mae-consumer:
   image:
     repository: linkedin/datahub-mae-consumer
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
       memory: 1536Mi
@@ -74,7 +99,7 @@ datahub-mae-consumer:
 datahub-mce-consumer:
   image:
     repository: linkedin/datahub-mce-consumer
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
       memory: 1536Mi
@@ -86,13 +111,13 @@ datahub-ingestion-cron:
   enabled: false
   image:
     repository: acryldata/datahub-ingestion
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
 
 elasticsearchSetupJob:
   enabled: true
   image:
     repository: linkedin/datahub-elasticsearch-setup
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
       cpu: 500m
@@ -100,7 +125,7 @@ elasticsearchSetupJob:
     requests:
       cpu: 300m
       memory: 256Mi
-  extraInitContainers: []
+  extraInitContainers: [ ]
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -111,18 +136,18 @@ elasticsearchSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: {}
+  podAnnotations: { }
   # Add extra sidecar containers to job pod
-  extraSidecars: []
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
+  extraSidecars: [ ]
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
 
 kafkaSetupJob:
   enabled: true
   image:
     repository: linkedin/datahub-kafka-setup
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
       cpu: 500m
@@ -130,7 +155,7 @@ kafkaSetupJob:
     requests:
       cpu: 300m
       memory: 768Mi
-  extraInitContainers: []
+  extraInitContainers: [ ]
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -141,18 +166,18 @@ kafkaSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: {}
+  podAnnotations: { }
   # Add extra sidecar containers to job pod
-  extraSidecars: []
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
+  extraSidecars: [ ]
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
 
 mysqlSetupJob:
-  enabled: true
+  enabled: false
   image:
     repository: acryldata/datahub-mysql-setup
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
       cpu: 500m
@@ -160,7 +185,7 @@ mysqlSetupJob:
     requests:
       cpu: 300m
       memory: 256Mi
-  extraInitContainers: []
+  extraInitContainers: [ ]
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -171,23 +196,23 @@ mysqlSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: {}
+  podAnnotations: { }
   # Optionally set a set-up job specific login (defaults to global login)
   # username: "mysqlSetupJob-login"
   # password:
   #   secretRef: mysqlSetupJob-secret
   #   secretKey: mysqlSetupJob-password
   # Add extra sidecar containers to job pod
-  extraSidecars: []
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
+  extraSidecars: [ ]
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
 
 postgresqlSetupJob:
-  enabled: false
+  enabled: true
   image:
     repository: acryldata/datahub-postgres-setup
-    # tag: "v0.10.0" # defaults to .global.datahub.version
+    # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
       cpu: 500m
@@ -195,7 +220,7 @@ postgresqlSetupJob:
     requests:
       cpu: 300m
       memory: 256Mi
-  extraInitContainers: []
+  extraInitContainers: [ ]
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -206,17 +231,17 @@ postgresqlSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: {}
+  podAnnotations: { }
   # Optionally set a set-up job specific login (defaults to global login)
   # username: "postgresqlSetupJob-login"
   # password:
   #   secretRef: postgresqlSetupJob-secret
   #   secretKey: postgresqlSetupJob-password
   # Add extra sidecar containers to job pod
-  extraSidecars: []
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
+  extraSidecars: [ ]
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
   # Optionally set a specific database using extraEnvs
   # extraEnvs: []
   #   - name: "DATAHUB_DB_NAME"
@@ -227,28 +252,28 @@ datahubUpgrade:
   enabled: true
   image:
     repository: acryldata/datahub-upgrade
-    # tag: "v0.10.0"  # defaults to .global.datahub.version
+    # tag: "v0.11.0"  # defaults to .global.datahub.version
   batchSize: 1000
   batchDelayMs: 100
   noCodeDataMigration:
-    sqlDbType: "MYSQL"
-    # sqlDbType: "POSTGRES"
-  podSecurityContext: {}
-    # fsGroup: 1000
-  securityContext: {}
-    # runAsUser: 1000
+    #    sqlDbType: "MYSQL"
+    sqlDbType: "POSTGRES"
+  podSecurityContext: { }
+  # fsGroup: 1000
+  securityContext: { }
+  # runAsUser: 1000
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "-2"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: {}
+  podAnnotations: { }
   # Add extra sidecar containers to job pod
-  extraSidecars: []
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
+  extraSidecars: [ ]
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
   cleanupJob:
     resources:
       limits:
@@ -258,10 +283,10 @@ datahubUpgrade:
         cpu: 300m
         memory: 256Mi
     # Add extra sidecar containers to job pod
-    extraSidecars: []
-      # - name: my-image-name
-      #   image: my-image
-      #   imagePullPolicy: Always
+    extraSidecars: [ ]
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
   restoreIndices:
     resources:
       limits:
@@ -271,15 +296,15 @@ datahubUpgrade:
         cpu: 300m
         memory: 256Mi
     # Add extra sidecar containers to job pod
-    extraSidecars: []
-      # - name: my-image-name
-      #   image: my-image
-      #   imagePullPolicy: Always
+    extraSidecars: [ ]
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
     # Optionally set a specific PostgreSQL database name using extraEnvs
     # extraEnvs:
     #   - name: "DATAHUB_DB_NAME"
     #    value: "dh"
-  extraInitContainers: []
+  extraInitContainers: [ ]
 
 ## Runs system update processes
 ## Includes: Elasticsearch Indices Creation/Reindex (See global.elasticsearch.index for additional configuration)
@@ -287,17 +312,17 @@ datahubSystemUpdate:
   image:
     repository: acryldata/datahub-upgrade
     # tag:
-  podSecurityContext: {}
-    # fsGroup: 1000
-  securityContext: {}
-    # runAsUser: 1000
+  podSecurityContext: { }
+  # fsGroup: 1000
+  securityContext: { }
+  # runAsUser: 1000
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-4"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: {}
+  podAnnotations: { }
   resources:
     limits:
       cpu: 500m
@@ -306,11 +331,11 @@ datahubSystemUpdate:
       cpu: 300m
       memory: 256Mi
   # Add extra sidecar containers to job pod
-  extraSidecars: []
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
-  extraInitContainers: []
+  extraSidecars: [ ]
+  # - name: my-image-name
+  #   image: my-image
+  #   imagePullPolicy: Always
+  extraInitContainers: [ ]
 
 global:
   strict_mode: true
@@ -513,30 +538,30 @@ global:
 
   sql:
     datasource:
-      host: "prerequisites-mysql:3306"
-      hostForMysqlClient: "prerequisites-mysql"
-      port: "3306"
-      url: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
-      driver: "com.mysql.cj.jdbc.Driver"
-      username: "root"
-      password:
-        secretRef: mysql-secrets
-        secretKey: mysql-root-password
+      #      host: "prerequisites-mysql:3306"
+      #      hostForMysqlClient: "prerequisites-mysql"
+      #      port: "3306"
+      #      url: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+      #      driver: "com.mysql.cj.jdbc.Driver"
+      #      username: "root"
+      #      password:
+      #        secretRef: mysql-secrets
+      #        secretKey: mysql-root-password
       # --------------OR----------------
       # value: password
 
       ## Use below for usage of PostgreSQL instead of MySQL
-      # host: "prerequisites-postgresql:5432"
-      # hostForpostgresqlClient: "prerequisites-postgresql"
-      # port: "5432"
-      # url: "jdbc:postgresql://prerequisites-postgresql:5432/datahub"
-      # driver: "org.postgresql.Driver"
-      # username: "postgres"
-      # password:
-      #   secretRef: postgresql-secrets
-      #   secretKey: postgres-password
-      # --------------OR----------------
-      #   value: password
+      host: "prerequisites-postgresql:5432"
+      hostForpostgresqlClient: "prerequisites-postgresql"
+      port: "5432"
+      url: "jdbc:postgresql://prerequisites-postgresql:5432/datahub"
+      driver: "org.postgresql.Driver"
+      username: "postgres"
+      password:
+        secretRef: postgresql-secrets
+        secretKey: postgres-password
+      #      --------------OR----------------
+      #      value: password
 
       # If you want to use specific PostgreSQL database use extraEnvs
       # extraEnvs:
@@ -583,7 +608,7 @@ global:
       provisionSecret:
         enabled: true
         autoGenerate: true
-        annotations: {}
+        annotations: { }
       # Only specify if autoGenerate set to false
       #  secretValues:
       #    encryptionKey: <encryption key value>
@@ -609,7 +634,7 @@ global:
       provisionSecrets:
         enabled: true
         autoGenerate: true
-        annotations: {}
+        annotations: { }
       # Only specify if autoGenerate set to false
       #  secretValues:
       #    secret: <secret value>

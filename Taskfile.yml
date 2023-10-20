@@ -1,0 +1,63 @@
+version: '3'
+
+dotenv:
+  - .env
+
+vars:
+  PROJECT_NAME: giga-dataops-platform_datahub
+  SHORT_SHA:
+    sh: git rev-parse --short HEAD
+
+tasks:
+  default:
+    desc: Install/upgrade all Datahub K8s resources
+    cmds:
+      - task: helm-up
+
+  setup:
+    desc: Run initial setup
+    cmds:
+      - helm repo add datahub https://helm.datahubproject.io
+
+  helm-up:
+    desc: Install/upgrade Datahub Helm chart
+    dir: helm
+    cmds:
+      - task: k8s-prereqs
+      - task: helm-up-prereqs
+      - task: helm-up-datahub
+
+  k8s-prereqs:
+    internal: true
+    desc: Install K8s configs/secrets
+    dir: k8s
+    cmds:
+      - kubectl apply -f secrets.yaml
+
+  helm-up-prereqs:
+    internal: true
+    desc: Install/upgrade Datahub prerequisites
+    dir: helm
+    cmds:
+      - helm upgrade --install prerequisites datahub/datahub-prerequisites --values prerequisites-values.yaml
+
+  helm-up-datahub:
+    internal: true
+    desc: Install/upgrade Datahub
+    dir: helm
+    cmds:
+      - >
+        helm upgrade --install datahub datahub/datahub
+        --values values.yaml
+        --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
+        --set datahub-frontend.oidcAuthentication.clientId={{.AUTH_OIDC_CLIENT_ID}}
+        --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
+
+  helm-down:
+    desc: Uninstall Helm charts
+    ignore_error: true
+    cmds:
+      - helm uninstall datahub
+      - helm uninstall prerequisites
+      - kubectl delete all --all
+      - kubectl delete pvc --all

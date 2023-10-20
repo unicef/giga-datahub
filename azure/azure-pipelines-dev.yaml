@@ -1,5 +1,9 @@
 trigger:
-- dev
+  branches:
+    include:
+      - dev
+
+pr: none
 
 pool:
   vmImage: ubuntu-latest
@@ -7,72 +11,102 @@ pool:
 variables:
   kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
   kubernetesNamespace: ictd-oi-datahub-dev
-  mysqlPass: $(MYSQL_PASS)
+  postgresqlPass: $(POSTGRESQL_PASS)
   neo4jPass: $(NEO4J_PASS)
+  datahubUserProps: $(DATAHUB_USER_PROPS)
+  aadClientId: $(AUTH_OIDC_CLIENT_ID)
+  aadClientSecret: $(AUTH_OIDC_CLIENT_SECRET)
+  aadTenantId: $(AUTH_OIDC_TENANT_ID)
+  datahubHost: $(DATAHUB_HOST)
   system.debug: true
 
 steps:
-- task: Kubernetes@1
-  displayName: Create secret for MySQL password
-  continueOnError: true
-  inputs:
-    connectionType: 'Kubernetes Service Connection'
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: create
-    arguments: "secret generic mysql-secrets --from-literal=mysql-root-password=$(mysqlPass)"
-    namespace: $(kubernetesNamespace)
+  - task: Kubernetes@1
+    displayName: Create secret for PostgreSQL password
+    continueOnError: true
+    inputs:
+      connectionType: "Kubernetes Service Connection"
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic postgresql-secrets --from-literal=postgres-password=$(postgresqlPass)"
 
-- task: Kubernetes@1
-  displayName: Create secret for Neo4j password
-  continueOnError: true
-  inputs:
-    connectionType: 'Kubernetes Service Connection'
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: create
-    arguments: "secret generic neo4j-secrets --from-literal=neo4j-password=$(neo4jPass)"
-    namespace: $(kubernetesNamespace)
+  - task: Kubernetes@1
+    displayName: Create secret for Neo4j password
+    continueOnError: true
+    inputs:
+      connectionType: "Kubernetes Service Connection"
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic neo4j-secrets --from-literal=neo4j-password=$(neo4jPass)"
 
-- task: HelmDeploy@0
-  displayName: 'Add Datahub Helm Repo'
-  inputs:
-    connectionType: Kubernetes Service Connection
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: 'repo'
-    arguments: 'add datahub https://helm.datahubproject.io/'
-    namespace: $(kubernetesNamespace)
+  - task: Kubernetes@1
+    displayName: Create secret for Datahub admin credentials
+    continueOnError: true
+    inputs:
+      connectionType: "Kubernetes Service Connection"
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic datahub-users-secret --from-literal=user.props=$(datahubUserProps)"
 
-- task: HelmDeploy@0
-  displayName: 'Deploy Datahub Prerequisites'
-  enabled: true
-  continueOnError: true
-  inputs:
-    connectionType: Kubernetes Service Connection
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: 'upgrade'
-    chartType: Name
-    chartName: datahub/datahub-prerequisites
-    releaseName: prerequisites
-    namespace: $(kubernetesNamespace)
-#    arguments: "--values helm/prerequisites-values.yaml"
+  - task: Kubernetes@1
+    displayName: Create secret for Azure AD client secret
+    continueOnError: true
+    inputs:
+      connectionType: "Kubernetes Service Connection"
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic giga-datahub --from-literal=AUTH_OIDC_CLIENT_SECRET=$(aadClientSecret)"
 
-- task: HelmDeploy@0
-  displayName: Helm deploy Datahub
-  inputs:
-    connectionType: Kubernetes Service Connection
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: 'upgrade'
-    chartType: Name
-    chartName: datahub/datahub
-    releaseName: datahub
-    namespace: $(kubernetesNamespace)
-    arguments: "--timeout 1h --values helm/values.yaml"
-#    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 1h"
+  - task: HelmDeploy@0
+    displayName: Add Datahub Helm Repo
+    inputs:
+      connectionType: Kubernetes Service Connection
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      command: "repo"
+      arguments: "add datahub https://helm.datahubproject.io/"
+      namespace: $(kubernetesNamespace)
 
-- task: Kubernetes@1
-  displayName: Set up Ingress
-  inputs:
-    connectionType: Kubernetes Service Connection
-    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-    command: apply
-    arguments: '-f azure/ingress.yaml'
-    namespace: $(kubernetesNamespace)
+  - task: HelmDeploy@0
+    displayName: Deploy Datahub Prerequisites
+    enabled: true
+    continueOnError: true
+    inputs:
+      connectionType: Kubernetes Service Connection
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      command: "upgrade"
+      chartType: Name
+      chartName: datahub/datahub-prerequisites
+      releaseName: prerequisites
+      namespace: $(kubernetesNamespace)
+      arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
+
+  - task: HelmDeploy@0
+    displayName: Helm deploy Datahub
+    inputs:
+      connectionType: Kubernetes Service Connection
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      command: "upgrade"
+      chartType: Name
+      chartName: datahub/datahub
+      releaseName: datahub
+      namespace: $(kubernetesNamespace)
+      arguments: >
+        --timeout 1h
+        --values $(Build.SourcesDirectory)/helm/values.yaml
+        --set datahub-frontend.ingress.hosts[0].host=$(datahubHost)
+        --set datahub-frontend.oidcAuthentication.clientId=$(aadClientId)
+        --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
+
+  - task: Kubernetes@1
+    displayName: Set up Ingress
+    inputs:
+      connectionType: Kubernetes Service Connection
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
+      command: apply
+      useConfigurationFile: true
+      configuration: $(Build.SourcesDirectory)/k8s/ingress.yaml
