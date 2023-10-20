@@ -11,20 +11,25 @@ pool:
 variables:
   kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
   kubernetesNamespace: ictd-oi-datahub-dev
-  mysqlPass: $(MYSQL_PASS)
+  postgresqlPass: $(POSTGRESQL_PASS)
   neo4jPass: $(NEO4J_PASS)
+  datahubUserProps: $(DATAHUB_USER_PROPS)
+  aadClientId: $(AUTH_OIDC_CLIENT_ID)
+  aadClientSecret: $(AUTH_OIDC_CLIENT_SECRET)
+  aadTenantId: $(AUTH_OIDC_TENANT_ID)
+  datahubHost: $(DATAHUB_HOST)
   system.debug: true
 
 steps:
   - task: Kubernetes@1
-    displayName: Create secret for MySQL password
+    displayName: Create secret for PostgreSQL password
     continueOnError: true
     inputs:
       connectionType: "Kubernetes Service Connection"
       kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: create
-      arguments: "secret generic mysql-secrets --from-literal=mysql-root-password=$(mysqlPass)"
       namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic postgresql-secrets --from-literal=postgres-password=$(postgresqlPass)"
 
   - task: Kubernetes@1
     displayName: Create secret for Neo4j password
@@ -32,12 +37,32 @@ steps:
     inputs:
       connectionType: "Kubernetes Service Connection"
       kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
       command: create
       arguments: "secret generic neo4j-secrets --from-literal=neo4j-password=$(neo4jPass)"
+
+  - task: Kubernetes@1
+    displayName: Create secret for Datahub admin credentials
+    continueOnError: true
+    inputs:
+      connectionType: "Kubernetes Service Connection"
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
       namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic datahub-users-secret --from-literal=user.props=$(datahubUserProps)"
+
+  - task: Kubernetes@1
+    displayName: Create secret for Azure AD client secret
+    continueOnError: true
+    inputs:
+      connectionType: "Kubernetes Service Connection"
+      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+      namespace: $(kubernetesNamespace)
+      command: create
+      arguments: "secret generic giga-datahub --from-literal=AUTH_OIDC_CLIENT_SECRET=$(aadClientSecret)"
 
   - task: HelmDeploy@0
-    displayName: 'Add Datahub Helm Repo'
+    displayName: Add Datahub Helm Repo
     inputs:
       connectionType: Kubernetes Service Connection
       kubernetesServiceEndpoint: $(kubernetesServiceConnection)
@@ -46,7 +71,7 @@ steps:
       namespace: $(kubernetesNamespace)
 
   - task: HelmDeploy@0
-    displayName: 'Deploy Datahub Prerequisites'
+    displayName: Deploy Datahub Prerequisites
     enabled: true
     continueOnError: true
     inputs:
@@ -57,7 +82,7 @@ steps:
       chartName: datahub/datahub-prerequisites
       releaseName: prerequisites
       namespace: $(kubernetesNamespace)
-  #    arguments: "--values helm/prerequisites-values.yaml"
+      arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
 
   - task: HelmDeploy@0
     displayName: Helm deploy Datahub
@@ -69,14 +94,19 @@ steps:
       chartName: datahub/datahub
       releaseName: datahub
       namespace: $(kubernetesNamespace)
-      arguments: "--timeout 1h --values helm/values.yaml"
-  #    arguments: "--values helm/datahub-frontend-values.yaml --values helm/datahub-gms-values.yaml --timeout 1h"
+      arguments: >
+        --timeout 1h
+        --values $(Build.SourcesDirectory)/helm/values.yaml
+        --set datahub-frontend.ingress.hosts[0].host=$(datahubHost)
+        --set datahub-frontend.oidcAuthentication.clientId=$(aadClientId)
+        --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
 
   - task: Kubernetes@1
     displayName: Set up Ingress
     inputs:
       connectionType: Kubernetes Service Connection
       kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: apply
-      arguments: "-f $(Build.SourcesDirectory)/k8s/ingress.yaml"
       namespace: $(kubernetesNamespace)
+      command: apply
+      useConfigurationFile: true
+      configuration: $(Build.SourcesDirectory)/k8s/ingress.yaml
