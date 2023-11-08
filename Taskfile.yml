@@ -4,20 +4,57 @@ dotenv:
   - .env
 
 vars:
-  PROJECT_NAME: giga-dataops-platform_datahub
+  PROJECT_NAME: giga-dataops_datahub
   SHORT_SHA:
     sh: git rev-parse --short HEAD
 
 tasks:
   default:
-    desc: Install/upgrade all Datahub K8s resources
     cmds:
-      - task: helm-up
+      - task: up
+
+  up:
+    desc: Build and start Docker containers
+    cmds:
+      - docker compose --project-name giga-dataops-platform --file docker-compose-network.yaml up --detach --build --remove-orphans {{.CLI_ARGS}}
+      - docker compose --project-name {{.PROJECT_NAME}} up --detach --build --remove-orphans {{.CLI_ARGS}}
 
   setup:
     desc: Run initial setup
     cmds:
       - helm repo add datahub https://helm.datahubproject.io
+
+  logs:
+    desc: Attach to Docker logs
+    cmds:
+      - docker compose --project-name {{.PROJECT_NAME}} logs --follow {{.CLI_ARGS}}
+
+  stop:
+    desc: Stop containers
+    cmds:
+      - docker compose --project-name {{.PROJECT_NAME}} stop {{.CLI_ARGS}}
+
+  restart:
+    desc: Restart containers
+    cmds:
+      - task: generate-dagster-yaml
+      - docker compose --project-name {{.PROJECT_NAME}} restart {{.CLI_ARGS}}
+
+  exec:
+    desc: Run a command in the specified container
+    cmds:
+      - docker compose --project-name {{.PROJECT_NAME}} exec {{.CLI_ARGS}}
+
+  ps:
+    desc: Show running processes in this project
+    cmds:
+      - docker compose --project-name {{.PROJECT_NAME}} ps
+
+  clean:
+    desc: Remove containers
+    cmds:
+      - docker compose --project-name {{.PROJECT_NAME}} down --volumes --remove-orphans {{.CLI_ARGS}}
+      - docker compose --project-name giga-dataops-platform --file docker-compose-network.yaml down --volumes --remove-orphans {{.CLI_ARGS}}
 
   helm-up:
     desc: Install/upgrade Datahub Helm chart
