@@ -15,8 +15,8 @@
     - `Datahub .env`
     - `Datahub secrets.yaml`
 4. In Bitwarden, you will also see some entries with a pattern
-   of `Datahub {service}.env`. Copy the contents of each of these entries into a new
-   file named `{service}.env`.
+   of `Datahub {service-name}.env`. Copy the contents of each of these entries into new
+   files named `{service-name}.env`.
 5. Run `task` to install the K8s & Helm items. This may take a while.
 6. Open the Datahub UI at `localhost:9002`.
 7. Go wild.
