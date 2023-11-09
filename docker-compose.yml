@@ -48,6 +48,8 @@ services:
     ports:
       - ${DATAHUB_MAPPED_FRONTEND_PORT:-9002}:9002
     env_file: datahub-frontend.env
+    environment:
+      METADATA_SERVICE_AUTH_ENABLED: true
     depends_on:
       datahub-gms:
         condition: service_healthy
@@ -70,6 +72,8 @@ services:
     ports:
       - ${DATAHUB_MAPPED_GMS_PORT:-8080}:8080
     env_file: datahub-gms.env
+    environment:
+      METADATA_SERVICE_AUTH_ENABLED: true
     healthcheck:
       test: curl -sS --fail http://datahub-gms:${DATAHUB_MAPPED_GMS_PORT:-8080}/health
       start_period: 90s
