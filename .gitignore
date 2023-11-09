@@ -4,3 +4,4 @@
 secrets.yaml
 .env
 *.env
+user.props
