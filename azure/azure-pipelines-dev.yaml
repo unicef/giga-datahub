@@ -134,4 +134,11 @@ stages:
                       --set datahub-frontend.ingress.hosts[0].host=$(datahubHost)
                       --set datahub-frontend.oidcAuthentication.clientId=$(aadClientId)
                       --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
-                      --set datahub-frontend.ingress.enabled=true
+
+                - task: Kubernetes@1
+                  displayName: Set up Ingress
+                  inputs:
+                    namespace: $(kubernetesNamespace)
+                    command: apply
+                    useConfigurationFile: true
+                    configuration: $(Build.SourcesDirectory)/k8s/ingress.yaml
