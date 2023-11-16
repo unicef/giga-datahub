@@ -32,12 +32,10 @@ stages:
             deploy:
               steps:
                 - checkout: self
-                  
+
                 - task: Kubernetes@1
                   displayName: Create secret for PostgreSQL password
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     namespace: $(kubernetesNamespace)
                     configurationType: inline
                     command: apply
@@ -55,8 +53,6 @@ stages:
                 - task: Kubernetes@1
                   displayName: Create secret for Neo4j password
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     namespace: $(kubernetesNamespace)
                     configurationType: inline
                     command: apply
@@ -74,8 +70,6 @@ stages:
                 - task: Kubernetes@1
                   displayName: Create secret for Datahub admin credentials
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     namespace: $(kubernetesNamespace)
                     configurationType: inline
                     command: apply
@@ -93,8 +87,6 @@ stages:
                 - task: Kubernetes@1
                   displayName: Create secret for Azure AD client secret
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     namespace: $(kubernetesNamespace)
                     configurationType: inline
                     command: apply
@@ -112,8 +104,6 @@ stages:
                 - task: HelmDeploy@0
                   displayName: Add Datahub Helm Repo
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     command: "repo"
                     arguments: "add datahub https://helm.datahubproject.io/"
                     namespace: $(kubernetesNamespace)
@@ -123,8 +113,6 @@ stages:
                   enabled: true
                   continueOnError: true
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     command: "upgrade"
                     chartType: Name
                     chartName: datahub/datahub-prerequisites
@@ -135,8 +123,6 @@ stages:
                 - task: HelmDeploy@0
                   displayName: Helm deploy Datahub
                   inputs:
-                    connectionType: Kubernetes Service Connection
-                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
                     command: "upgrade"
                     chartType: Name
                     chartName: datahub/datahub
