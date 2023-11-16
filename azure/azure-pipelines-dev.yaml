@@ -9,8 +9,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
-  kubernetesNamespace: ictd-oi-datahub-dev
+  kubernetesEnvironment: $(KUBERNETES_ENVIRONMENT)
+  kubernetesNamespace: $(KUBERNETES_NAMESPACE)
   postgresqlPass: $(POSTGRESQL_PASS)
   neo4jPass: $(NEO4J_PASS)
   datahubUserProps: $(DATAHUB_USER_PROPS)
@@ -20,129 +20,132 @@ variables:
   datahubHost: $(DATAHUB_HOST)
   system.debug: true
 
-steps:
-  - task: Kubernetes@1
-    displayName: Create secret for PostgreSQL password
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      namespace: $(kubernetesNamespace)
-      configurationType: inline
-      command: apply
-      useConfigurationFile: true
-      inline: |
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: postgresql-secrets
-          labels:
-            app: giga-datahub
-        stringData:
-          postgres-password: "$(postgresqlPass)"
+stages:
+  - stage: Deploy
+    displayName: Deploy Datahub
+    jobs:
+      - deployment: Deploy
+        displayName: Datahub Deployment
+        environment: $(kubernetesEnvironment)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  
+                - task: Kubernetes@1
+                  displayName: Create secret for PostgreSQL password
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    namespace: $(kubernetesNamespace)
+                    configurationType: inline
+                    command: apply
+                    useConfigurationFile: true
+                    inline: |
+                      apiVersion: v1
+                      kind: Secret
+                      metadata:
+                        name: postgresql-secrets
+                        labels:
+                          app: giga-datahub
+                      stringData:
+                        postgres-password: "$(postgresqlPass)"
 
-  - task: Kubernetes@1
-    displayName: Create secret for Neo4j password
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      namespace: $(kubernetesNamespace)
-      configurationType: inline
-      command: apply
-      useConfigurationFile: true
-      inline: |
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: neo4j-secrets
-          labels:
-            app: giga-datahub
-        stringData:
-          neo4j-password: "$(neo4jPass)"
+                - task: Kubernetes@1
+                  displayName: Create secret for Neo4j password
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    namespace: $(kubernetesNamespace)
+                    configurationType: inline
+                    command: apply
+                    useConfigurationFile: true
+                    inline: |
+                      apiVersion: v1
+                      kind: Secret
+                      metadata:
+                        name: neo4j-secrets
+                        labels:
+                          app: giga-datahub
+                      stringData:
+                        neo4j-password: "$(neo4jPass)"
 
-  - task: Kubernetes@1
-    displayName: Create secret for Datahub admin credentials
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      namespace: $(kubernetesNamespace)
-      configurationType: inline
-      command: apply
-      useConfigurationFile: true
-      inline: |
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: datahub-users-secret
-          labels:
-            app: giga-datahub
-        stringData:
-          user.props: "$(datahubUserProps)"
+                - task: Kubernetes@1
+                  displayName: Create secret for Datahub admin credentials
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    namespace: $(kubernetesNamespace)
+                    configurationType: inline
+                    command: apply
+                    useConfigurationFile: true
+                    inline: |
+                      apiVersion: v1
+                      kind: Secret
+                      metadata:
+                        name: datahub-users-secret
+                        labels:
+                          app: giga-datahub
+                      stringData:
+                        user.props: "$(datahubUserProps)"
 
-  - task: Kubernetes@1
-    displayName: Create secret for Azure AD client secret
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      namespace: $(kubernetesNamespace)
-      configurationType: inline
-      command: apply
-      useConfigurationFile: true
-      inline: |
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: giga-datahub
-          labels:
-            app: giga-datahub
-        stringData:
-          AUTH_OIDC_CLIENT_SECRET: "$(aadClientSecret)"
+                - task: Kubernetes@1
+                  displayName: Create secret for Azure AD client secret
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    namespace: $(kubernetesNamespace)
+                    configurationType: inline
+                    command: apply
+                    useConfigurationFile: true
+                    inline: |
+                      apiVersion: v1
+                      kind: Secret
+                      metadata:
+                        name: giga-datahub
+                        labels:
+                          app: giga-datahub
+                      stringData:
+                        AUTH_OIDC_CLIENT_SECRET: "$(aadClientSecret)"
 
-  - task: HelmDeploy@0
-    displayName: Add Datahub Helm Repo
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: "repo"
-      arguments: "add datahub https://helm.datahubproject.io/"
-      namespace: $(kubernetesNamespace)
+                - task: HelmDeploy@0
+                  displayName: Add Datahub Helm Repo
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    command: "repo"
+                    arguments: "add datahub https://helm.datahubproject.io/"
+                    namespace: $(kubernetesNamespace)
 
-  - task: HelmDeploy@0
-    displayName: Deploy Datahub Prerequisites
-    enabled: true
-    continueOnError: true
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: "upgrade"
-      chartType: Name
-      chartName: datahub/datahub-prerequisites
-      releaseName: prerequisites
-      namespace: $(kubernetesNamespace)
-      arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
+                - task: HelmDeploy@0
+                  displayName: Deploy Datahub Prerequisites
+                  enabled: true
+                  continueOnError: true
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    command: "upgrade"
+                    chartType: Name
+                    chartName: datahub/datahub-prerequisites
+                    releaseName: prerequisites
+                    namespace: $(kubernetesNamespace)
+                    arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
 
-  - task: HelmDeploy@0
-    displayName: Helm deploy Datahub
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: "upgrade"
-      chartType: Name
-      chartName: datahub/datahub
-      releaseName: datahub
-      namespace: $(kubernetesNamespace)
-      arguments: >
-        --timeout 1h
-        --values $(Build.SourcesDirectory)/helm/values.yaml
-        --set datahub-frontend.ingress.hosts[0].host=$(datahubHost)
-        --set datahub-frontend.oidcAuthentication.clientId=$(aadClientId)
-        --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
-
-  - task: Kubernetes@1
-    displayName: Set up Ingress
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      namespace: $(kubernetesNamespace)
-      command: apply
-      useConfigurationFile: true
-      configuration: $(Build.SourcesDirectory)/k8s/ingress.yaml
+                - task: HelmDeploy@0
+                  displayName: Helm deploy Datahub
+                  inputs:
+                    connectionType: Kubernetes Service Connection
+                    kubernetesServiceEndpoint: $(kubernetesServiceConnection)
+                    command: "upgrade"
+                    chartType: Name
+                    chartName: datahub/datahub
+                    releaseName: datahub
+                    namespace: $(kubernetesNamespace)
+                    arguments: >
+                      --timeout 1h
+                      --values $(Build.SourcesDirectory)/helm/values.yaml
+                      --set datahub-frontend.ingress.hosts[0].host=$(datahubHost)
+                      --set datahub-frontend.oidcAuthentication.clientId=$(aadClientId)
+                      --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
+                      --set datahub-frontend.ingress.enabled=true

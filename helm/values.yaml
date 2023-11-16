@@ -34,10 +34,15 @@ datahub-frontend:
   ingress:
     enabled: false
     extraLabels: { }
-    annotations: { }
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway
+      appgw.ingress.kubernetes.io/appgw-ssl-certificate: "kv-cert-unitst"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
     hosts:
-      - host: ""
-        paths: [ ]
+      - host: io-datahub-dev.unitst.org
+        paths:
+          - path: /
+            pathType: Exact
         redirectPaths: [ ]
     tls: [ ]
   defaultUserCredentials: { }
