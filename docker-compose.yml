@@ -1,7 +1,3 @@
-x-common-config: &common-config
-  networks:
-    giga-dataops
-
 version: '3.9'
 
 networks:

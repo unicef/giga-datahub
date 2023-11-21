@@ -67,10 +67,12 @@ datahub-frontend:
   oidcAuthentication:
     enabled: true
     provider: azure
-    clientId: ""
+    clientIdRef:
+      secretRef: oi-datahub-secrets-dev
+      secretKey: AZURE_CLIENT_ID
     clientSecretRef:
-      secretRef: giga-datahub
-      secretKey: AUTH_OIDC_CLIENT_SECRET
+      secretRef: oi-datahub-secrets-dev
+      secretKey: AZURE_CLIENT_SECRET
     azureTenantId: ""
     scope: "openid profile email"
 

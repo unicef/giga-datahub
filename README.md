@@ -1,10 +1,19 @@
 # Giga Datahub
 
+## Project Brief
+
+Datahub app for UNICEF Giga.
+
+Status: **In Progress** / Production / Deprecated
+
 ## Prerequisites
 
 - [ ] Docker
 - [ ] Task
 - [ ] Bitwarden CLI
+
+Check [here](https://github.com/thinkingmachines/giga-dataops-platform/blob/master/docs/development.md#pre-requisites)
+for prerequisite setup instructions.
 
 ## Development
 
@@ -36,3 +45,12 @@
 8. Open the Datahub UI at `http://localhost:9002/login`.
 9. Login with the Bitwarden credentials `Datahub-DEV Admin Credentials`.
 10. Go wild.
+
+## Jump to other platform services
+
+- [Dagster](https://github.com/unicef/giga-dagster)
+- [Data Ingestion](https://github.com/unicef/giga-data-ingestion)
+- [Data Sharing](https://github.com/unicef/giga-data-sharing)
+- [Datahub](https://github.com/unicef/giga-datahub)
+- [Superset](https://github.com/unicef/giga-superset)
+- [Trino](https://github.com/unicef/giga-trino)

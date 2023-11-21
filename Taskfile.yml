@@ -7,6 +7,7 @@ vars:
   PROJECT_NAME: giga-dataops_datahub
   SHORT_SHA:
     sh: git rev-parse --short HEAD
+  DATAHUB_VERSION: 0.11.0
 
 tasks:
   default:
@@ -84,11 +85,14 @@ tasks:
     dir: helm
     cmds:
       - >
-        helm upgrade --install datahub datahub/datahub
+        helm upgrade --install datahub ./datahub
         --values values.yaml
         --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
-        --set datahub-frontend.oidcAuthentication.clientId={{.AUTH_OIDC_CLIENT_ID}}
         --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
+        --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub
+        --set datahub-frontend.oidcAuthentication.clientIdRef.secretKey=AUTH_OIDC_CLIENT_ID
+        --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub
+        --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
 
   helm-down:
     desc: Uninstall Helm charts
