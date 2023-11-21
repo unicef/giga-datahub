@@ -14,9 +14,7 @@ variables:
   postgresqlPass: $(POSTGRESQL_PASS)
   neo4jPass: $(NEO4J_PASS)
   datahubUserProps: $(DATAHUB_USER_PROPS)
-  aadClientId: $(AUTH_OIDC_CLIENT_ID)
-  aadClientSecret: $(AUTH_OIDC_CLIENT_SECRET)
-  aadTenantId: $(AUTH_OIDC_TENANT_ID)
+  aadTenantId: $(AZURE_TENANT_ID)
   datahubHost: $(DATAHUB_HOST)
   system.debug: true
 
@@ -84,23 +82,6 @@ stages:
                       stringData:
                         user.props: "$(datahubUserProps)"
 
-                - task: Kubernetes@1
-                  displayName: Create secret for Azure AD client secret
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    configurationType: inline
-                    command: apply
-                    useConfigurationFile: true
-                    inline: |
-                      apiVersion: v1
-                      kind: Secret
-                      metadata:
-                        name: giga-datahub
-                        labels:
-                          app: giga-datahub
-                      stringData:
-                        AUTH_OIDC_CLIENT_SECRET: "$(aadClientSecret)"
-
                 - task: HelmDeploy@0
                   displayName: Add Datahub Helm Repo
                   inputs:
@@ -124,15 +105,13 @@ stages:
                   displayName: Helm deploy Datahub
                   inputs:
                     command: "upgrade"
-                    chartType: Name
-                    chartName: datahub/datahub
+                    chartType: FilePath
+                    chartPath: $(Build.SourcesDirectory)/helm/datahub
                     releaseName: datahub
                     namespace: $(kubernetesNamespace)
                     arguments: >
                       --timeout 1h
                       --values $(Build.SourcesDirectory)/helm/values.yaml
-                      --set datahub-frontend.ingress.hosts[0].host=$(datahubHost)
-                      --set datahub-frontend.oidcAuthentication.clientId=$(aadClientId)
                       --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
 
                 - task: Kubernetes@1
