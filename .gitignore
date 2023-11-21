@@ -1,7 +1,7 @@
 # Pycharm
 .idea
 
-secrets.yaml
+k8s/secrets.yaml
 .env
 *.env
 user.props
