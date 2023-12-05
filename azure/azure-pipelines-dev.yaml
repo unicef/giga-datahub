@@ -120,4 +120,4 @@ stages:
                     namespace: $(kubernetesNamespace)
                     command: apply
                     useConfigurationFile: true
-                    configuration: $(Build.SourcesDirectory)/k8s/ingress.yaml
+                    configuration: $(Build.SourcesDirectory)/k8s/ingress-dev.yaml
