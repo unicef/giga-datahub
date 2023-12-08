@@ -1,49 +1,53 @@
-trigger:
-  - main
+trigger: none
+
+pr: none
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  kubernetesServiceConnection: Datahub-DEV-uni-apps-aks-dev-ictd-oi-datahub-dev-1684231863813
-  kubernetesNamespace: ictd-oi-datahub-dev
+  kubernetesEnvironment: $(KUBERNETES_ENVIRONMENT)
+  kubernetesNamespace: $(KUBERNETES_NAMESPACE)
+  system.debug: true
 
-steps:
-  - task: HelmDeploy@0
-    displayName: 'Delete Datahub Helm'
-    continueOnError: true
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: 'uninstall'
-      arguments: 'datahub'
-      namespace: $(kubernetesNamespace)
+stages:
+  - stage: Delete
+    displayName: Delete Datahub
+    jobs:
+      - deployment: Deploy
+        displayName: Delete Datahub
+        environment: $(kubernetesEnvironment)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: HelmDeploy@0
+                  displayName: 'Delete Datahub Helm'
+                  continueOnError: true
+                  inputs:
+                    command: 'uninstall'
+                    arguments: 'datahub'
+                    namespace: $(kubernetesNamespace)
 
-  - task: HelmDeploy@0
-    displayName: 'Delete Datahub Helm Prerequisites'
-    continueOnError: true
-    inputs:
-      connectionType: Kubernetes Service Connection
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: 'uninstall'
-      arguments: 'prerequisites'
-      namespace: $(kubernetesNamespace)
+                - task: HelmDeploy@0
+                  displayName: 'Delete Datahub Helm Prerequisites'
+                  continueOnError: true
+                  inputs:
+                    command: 'uninstall'
+                    arguments: 'prerequisites'
+                    namespace: $(kubernetesNamespace)
 
-  - task: Kubernetes@1
-    displayName: Delete resources in namespace
-    inputs:
-      connectionType: 'Kubernetes Service Connection'
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: delete
-      arguments: "all --all"
-      namespace: $(kubernetesNamespace)
+                - task: Kubernetes@1
+                  displayName: Delete resources in namespace
+                  inputs:
+                    command: delete
+                    arguments: "all --all"
+                    namespace: $(kubernetesNamespace)
 
-  - task: Kubernetes@1
-    displayName: Delete PVC in namespace
-    continueOnError: true
-    inputs:
-      connectionType: 'Kubernetes Service Connection'
-      kubernetesServiceEndpoint: $(kubernetesServiceConnection)
-      command: delete
-      arguments: "pvc --all"
-      namespace: $(kubernetesNamespace)
+                - task: Kubernetes@1
+                  displayName: Delete PVC in namespace
+                  continueOnError: true
+                  inputs:
+                    command: delete
+                    arguments: "pvc --all"
+                    namespace: $(kubernetesNamespace)
