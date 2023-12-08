@@ -19,11 +19,11 @@ variables:
   system.debug: true
 
 stages:
-  - stage: Deploy
-    displayName: Deploy Datahub
+  - stage: CreateConfig
+    displayName: Create/update K8s configuration resources
     jobs:
       - deployment: Deploy
-        displayName: Datahub Deployment
+        displayName: Create/update K8s configuration resources
         environment: $(kubernetesEnvironment)
         strategy:
           runOnce:
@@ -82,6 +82,18 @@ stages:
                       stringData:
                         user.props: "$(datahubUserProps)"
 
+  - stage: DeployPrerequisites
+    displayName: Deploy Datahub Prerequisites
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy Datahub Prerequisites
+        environment: $(kubernetesEnvironment)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
                 - task: HelmDeploy@0
                   displayName: Add Datahub Helm Repo
                   inputs:
@@ -101,6 +113,25 @@ stages:
                     namespace: $(kubernetesNamespace)
                     arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
 
+  - stage: DeployDatahub
+    displayName: Deploy Datahub
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy Datahub
+        environment: $(kubernetesEnvironment)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: HelmDeploy@0
+                  displayName: Add Datahub Helm Repo
+                  inputs:
+                    command: "repo"
+                    arguments: "add datahub https://helm.datahubproject.io/"
+                    namespace: $(kubernetesNamespace)
+
                 - task: HelmDeploy@0
                   displayName: Helm deploy Datahub
                   inputs:
@@ -113,6 +144,20 @@ stages:
                       --timeout 1h
                       --values $(Build.SourcesDirectory)/helm/values.yaml
                       --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
+                      --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=oi-datahub-secrets-stg
+                      --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=oi-datahub-secrets-stg
+
+  - stage: CreateIngress
+    displayName: Create/update K8s ingress resource
+    jobs:
+      - deployment: Deploy
+        displayName: Create/update K8s ingress resource
+        environment: $(kubernetesEnvironment)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
 
                 - task: Kubernetes@1
                   displayName: Set up Ingress

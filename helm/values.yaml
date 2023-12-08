@@ -68,10 +68,10 @@ datahub-frontend:
     enabled: true
     provider: azure
     clientIdRef:
-      secretRef: oi-datahub-secrets-dev
+      secretRef: ""
       secretKey: AZURE_CLIENT_ID
     clientSecretRef:
-      secretRef: oi-datahub-secrets-dev
+      secretRef: ""
       secretKey: AZURE_CLIENT_SECRET
     azureTenantId: ""
     scope: "openid profile email"
