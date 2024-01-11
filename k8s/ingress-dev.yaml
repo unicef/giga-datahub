@@ -18,3 +18,10 @@ spec:
                 name: datahub-datahub-frontend
                 port:
                   number: 9002
+          - path: /gms
+            pathType: Prefix
+            backend:
+              service:
+                name: datahub-datahub-gms
+                port:
+                  number: 8080

@@ -11,6 +11,8 @@ datahub-gms:
     requests:
       cpu: 100m
       memory: 1Gi
+  service:
+    type: ClusterIP
   # Optionally set a GMS specific SQL login (defaults to global login)
   # sql:
   #   datasource:
@@ -47,7 +49,7 @@ datahub-frontend:
     tls: [ ]
   defaultUserCredentials: { }
   service:
-    type: LoadBalancer
+    type: ClusterIP
   #  randomAdminPassword: true
   #  # You can also set specific passwords for default users
   #  # manualValues: |
