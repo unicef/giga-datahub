@@ -133,6 +133,13 @@ stages:
                     namespace: $(kubernetesNamespace)
 
                 - task: HelmDeploy@0
+                  displayName: Add Bitnami Helm Repo
+                  inputs:
+                    command: "repo"
+                    arguments: "add bitnami https://charts.bitnami.com/bitnami"
+                    namespace: $(kubernetesNamespace)
+
+                - task: HelmDeploy@0
                   displayName: Helm deploy Datahub
                   inputs:
                     command: "upgrade"
@@ -146,6 +153,16 @@ stages:
                       --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
                       --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=oi-datahub-secrets-dev
                       --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=oi-datahub-secrets-dev
+
+                - task: HelmDeploy@0
+                  displayName: Helm deploy Nginx
+                  inputs:
+                    command: upgrade
+                    chartType: Name
+                    chartName: bitnami/nginx
+                    releaseName: nginx
+                    namespace: $(kubernetesNamespace)
+                    arguments: "--values $(Build.SourcesDirectory)/helm/nginx-values.yaml"
 
   - stage: CreateIngress
     displayName: Create/update K8s ingress resource

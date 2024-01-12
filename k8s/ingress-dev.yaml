@@ -12,16 +12,9 @@ spec:
       http:
         paths:
           - path: /
-            pathType: Exact
-            backend:
-              service:
-                name: datahub-datahub-frontend
-                port:
-                  number: 9002
-          - path: /gms
             pathType: Prefix
             backend:
               service:
-                name: datahub-datahub-gms
+                name: nginx
                 port:
-                  number: 8080
+                  number: 9002
