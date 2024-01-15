@@ -1,0 +1,31 @@
+jobs:
+  - deployment: Deploy
+    displayName: Deploy Datahub
+    environment: $(kubernetesEnvironment)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+
+            - task: HelmDeploy@0
+              displayName: Add Datahub Helm Repo
+              inputs:
+                command: repo
+                arguments: add datahub https://helm.datahubproject.io/
+                namespace: $(kubernetesNamespace)
+
+            - task: HelmDeploy@0
+              displayName: Helm deploy Datahub
+              inputs:
+                command: upgrade
+                chartType: FilePath
+                chartPath: $(Build.SourcesDirectory)/helm/datahub
+                releaseName: datahub
+                namespace: $(kubernetesNamespace)
+                arguments: >
+                  --timeout 1h
+                  --values $(Build.SourcesDirectory)/helm/values.yaml
+                  --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
+                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef="oi-datahub-secrets-$(environment)"
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(environment)"

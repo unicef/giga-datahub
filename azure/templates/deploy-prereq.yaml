@@ -1,0 +1,28 @@
+jobs:
+  - deployment: Deploy
+    displayName: Deploy Datahub Prerequisites
+    environment: $(kubernetesEnvironment)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+
+            - task: HelmDeploy@0
+              displayName: Add Datahub Helm Repo
+              inputs:
+                command: repo
+                arguments: add datahub https://helm.datahubproject.io/
+                namespace: $(kubernetesNamespace)
+
+            - task: HelmDeploy@0
+              displayName: Deploy Datahub Prerequisites
+              enabled: true
+              continueOnError: true
+              inputs:
+                command: upgrade
+                chartType: Name
+                chartName: datahub/datahub-prerequisites
+                releaseName: prerequisites
+                namespace: $(kubernetesNamespace)
+                arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
