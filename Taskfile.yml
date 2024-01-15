@@ -58,26 +58,47 @@ tasks:
       - docker compose --project-name giga-dataops-platform --file docker-compose-network.yaml down --volumes --remove-orphans {{.CLI_ARGS}}
 
   helm-up:
-    desc: Install/upgrade Datahub Helm chart
+    desc: Install/upgrade Datahub Helm chart on a local cluster
     dir: helm
     cmds:
       - task: k8s-prereqs
       - task: helm-up-prereqs
       - task: helm-up-datahub
 
+  helm-upi:
+    desc: Install/upgrade Datahub Helm chart with HTTPS ingress
+    dir: helm
+    cmds:
+      - task: k8s-prereqs
+      - task: helm-up-prereqs
+      - task: helm-up-datahub
+      - task: k8s-ingress
+
   k8s-prereqs:
     internal: true
     desc: Install K8s configs/secrets
     dir: k8s
     cmds:
-      - kubectl apply -f secrets.yaml
+      - kubectl apply -f namespace.yaml
+      - kubectl apply -f secrets.yaml --namespace giga-datahub
+
+  k8s-ingress:
+    internal: true
+    desc: Install k8s ingress
+    dir: k8s
+    cmds:
+      - kubectl apply -f ingress-local.yaml --namespace giga-datahub
 
   helm-up-prereqs:
     internal: true
     desc: Install/upgrade Datahub prerequisites
     dir: helm
     cmds:
-      - helm upgrade --install prerequisites datahub/datahub-prerequisites --values prerequisites-values.yaml
+      - >
+        helm upgrade --install prerequisites datahub/datahub-prerequisites
+        --values prerequisites-values.yaml
+        --namespace giga-datahub
+        --create-namespace
 
   helm-up-datahub:
     internal: true
@@ -87,6 +108,9 @@ tasks:
       - >
         helm upgrade --install datahub ./datahub
         --values values.yaml
+        --namespace giga-datahub
+        --create-namespace
+        --timeout 1h
         --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
         --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
         --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub
@@ -97,8 +121,10 @@ tasks:
   helm-down:
     desc: Uninstall Helm charts
     ignore_error: true
+    dir: k8s
     cmds:
-      - helm uninstall datahub
-      - helm uninstall prerequisites
-      - kubectl delete all --all
-      - kubectl delete pvc --all
+      - helm uninstall datahub --namespace giga-datahub
+      - helm uninstall prerequisites --namespace giga-datahub
+      - kubectl delete all --all --namespace giga-datahub
+      - kubectl delete pvc --all --namespace giga-datahub
+      - kubectl delete -f namespace.yaml

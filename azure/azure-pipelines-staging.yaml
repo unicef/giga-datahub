@@ -9,160 +9,31 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  kubernetesEnvironment: $(KUBERNETES_ENVIRONMENT)
-  kubernetesNamespace: $(KUBERNETES_NAMESPACE)
-  postgresqlPass: $(POSTGRESQL_PASS)
-  neo4jPass: $(NEO4J_PASS)
-  datahubUserProps: $(DATAHUB_USER_PROPS)
-  aadTenantId: $(AZURE_TENANT_ID)
-  datahubHost: $(DATAHUB_HOST)
-  system.debug: true
+  - template: templates/variables.yaml
+  - name: environment
+    value: stg
 
 stages:
   - stage: CreateConfig
     displayName: Create/update K8s configuration resources
     jobs:
-      - deployment: Deploy
-        displayName: Create/update K8s configuration resources
-        environment: $(kubernetesEnvironment)
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
+      - template: templates/create-config.yaml
 
-                - task: Kubernetes@1
-                  displayName: Create secret for PostgreSQL password
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    configurationType: inline
-                    command: apply
-                    useConfigurationFile: true
-                    inline: |
-                      apiVersion: v1
-                      kind: Secret
-                      metadata:
-                        name: postgresql-secrets
-                        labels:
-                          app: giga-datahub
-                      stringData:
-                        postgres-password: "$(postgresqlPass)"
-
-                - task: Kubernetes@1
-                  displayName: Create secret for Neo4j password
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    configurationType: inline
-                    command: apply
-                    useConfigurationFile: true
-                    inline: |
-                      apiVersion: v1
-                      kind: Secret
-                      metadata:
-                        name: neo4j-secrets
-                        labels:
-                          app: giga-datahub
-                      stringData:
-                        neo4j-password: "$(neo4jPass)"
-
-                - task: Kubernetes@1
-                  displayName: Create secret for Datahub admin credentials
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    configurationType: inline
-                    command: apply
-                    useConfigurationFile: true
-                    inline: |
-                      apiVersion: v1
-                      kind: Secret
-                      metadata:
-                        name: datahub-users-secret
-                        labels:
-                          app: giga-datahub
-                      stringData:
-                        user.props: "$(datahubUserProps)"
+  - stage: CreateIngress
+    displayName: Create/update K8s ingress resource
+    dependsOn: [ ]
+    jobs:
+      - template: templates/create-ingress.yaml
 
   - stage: DeployPrerequisites
     displayName: Deploy Datahub Prerequisites
+    dependsOn:
+      - CreateConfig
+      - CreateIngress
     jobs:
-      - deployment: Deploy
-        displayName: Deploy Datahub Prerequisites
-        environment: $(kubernetesEnvironment)
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-
-                - task: HelmDeploy@0
-                  displayName: Add Datahub Helm Repo
-                  inputs:
-                    command: "repo"
-                    arguments: "add datahub https://helm.datahubproject.io/"
-                    namespace: $(kubernetesNamespace)
-
-                - task: HelmDeploy@0
-                  displayName: Deploy Datahub Prerequisites
-                  enabled: true
-                  continueOnError: true
-                  inputs:
-                    command: "upgrade"
-                    chartType: Name
-                    chartName: datahub/datahub-prerequisites
-                    releaseName: prerequisites
-                    namespace: $(kubernetesNamespace)
-                    arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
+      - template: templates/deploy-prereq.yaml
 
   - stage: DeployDatahub
     displayName: Deploy Datahub
     jobs:
-      - deployment: Deploy
-        displayName: Deploy Datahub
-        environment: $(kubernetesEnvironment)
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-
-                - task: HelmDeploy@0
-                  displayName: Add Datahub Helm Repo
-                  inputs:
-                    command: "repo"
-                    arguments: "add datahub https://helm.datahubproject.io/"
-                    namespace: $(kubernetesNamespace)
-
-                - task: HelmDeploy@0
-                  displayName: Helm deploy Datahub
-                  inputs:
-                    command: "upgrade"
-                    chartType: FilePath
-                    chartPath: $(Build.SourcesDirectory)/helm/datahub
-                    releaseName: datahub
-                    namespace: $(kubernetesNamespace)
-                    arguments: >
-                      --timeout 1h
-                      --values $(Build.SourcesDirectory)/helm/values.yaml
-                      --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
-                      --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=oi-datahub-secrets-stg
-                      --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=oi-datahub-secrets-stg
-
-  - stage: CreateIngress
-    displayName: Create/update K8s ingress resource
-    jobs:
-      - deployment: Deploy
-        displayName: Create/update K8s ingress resource
-        environment: $(kubernetesEnvironment)
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-
-                - task: Kubernetes@1
-                  displayName: Set up Ingress
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    command: apply
-                    useConfigurationFile: true
-                    configuration: $(Build.SourcesDirectory)/k8s/ingress-staging.yaml
+      - template: templates/deploy-datahub.yaml

@@ -2,6 +2,7 @@
 .idea
 
 k8s/secrets.yaml
+ingress-local.yaml
 .env
 *.env
 user.props

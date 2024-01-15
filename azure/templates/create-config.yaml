@@ -1,0 +1,60 @@
+jobs:
+  - deployment: Deploy
+    displayName: Create/update K8s configuration resources
+    environment: $(kubernetesEnvironment)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+
+            - task: Kubernetes@1
+              displayName: Create secret for PostgreSQL password
+              inputs:
+                namespace: $(kubernetesNamespace)
+                configurationType: inline
+                command: apply
+                useConfigurationFile: true
+                inline: |
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: postgresql-secrets
+                    labels:
+                      app: giga-datahub
+                  stringData:
+                    postgres-password: "$(postgresqlPass)"
+
+            - task: Kubernetes@1
+              displayName: Create secret for Neo4j password
+              inputs:
+                namespace: $(kubernetesNamespace)
+                configurationType: inline
+                command: apply
+                useConfigurationFile: true
+                inline: |
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: neo4j-secrets
+                    labels:
+                      app: giga-datahub
+                  stringData:
+                    neo4j-password: "$(neo4jPass)"
+
+            - task: Kubernetes@1
+              displayName: Create secret for Datahub admin credentials
+              inputs:
+                namespace: $(kubernetesNamespace)
+                configurationType: inline
+                command: apply
+                useConfigurationFile: true
+                inline: |
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: datahub-users-secret
+                    labels:
+                      app: giga-datahub
+                  stringData:
+                    user.props: "$(datahubUserProps)"

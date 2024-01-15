@@ -1,0 +1,26 @@
+jobs:
+  - deployment: Deploy
+    displayName: Create/update K8s ingress resource
+    environment: $(kubernetesEnvironment)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+
+            - task: Kubernetes@1
+              displayName: Set up Datahub ingress
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: apply
+                useConfigurationFile: true
+                configuration: "$(Build.SourcesDirectory)/k8s/ingress-$(environment).yaml"
+
+            - task: Kubernetes@1
+              displayName: Set up Datahub GMS ingress
+              condition: eq(variables.environment, 'dev')
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: apply
+                useConfigurationFile: true
+                configuration: "$(Build.SourcesDirectory)/k8s/gms-ingress.yaml"
