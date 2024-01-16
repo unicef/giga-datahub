@@ -158,7 +158,7 @@ stages:
             deploy:
               steps:
                 - checkout: self
-                  
+
                 - task: Kubernetes@1
                   displayName: Set up Datahub ingress
                   inputs:
@@ -166,3 +166,11 @@ stages:
                     command: apply
                     useConfigurationFile: true
                     configuration: $(Build.SourcesDirectory)/k8s/ingress-dev.yaml
+
+                - task: Kubernetes@1
+                  displayName: Set up Datahub GMS ingress
+                  inputs:
+                    namespace: $(kubernetesNamespace)
+                    command: apply
+                    useConfigurationFile: true
+                    configuration: $(Build.SourcesDirectory)/k8s/gms-ingress.yaml
