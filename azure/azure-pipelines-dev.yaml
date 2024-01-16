@@ -82,6 +82,34 @@ stages:
                       stringData:
                         user.props: "$(datahubUserProps)"
 
+  - stage: CreateIngress
+    displayName: Create/update K8s ingress resource
+    jobs:
+      - deployment: Deploy
+        displayName: Create/update K8s ingress resource
+        environment: $(kubernetesEnvironment)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: Kubernetes@1
+                  displayName: Set up Datahub ingress
+                  inputs:
+                    namespace: $(kubernetesNamespace)
+                    command: apply
+                    useConfigurationFile: true
+                    configuration: $(Build.SourcesDirectory)/k8s/ingress-dev.yaml
+
+                - task: Kubernetes@1
+                  displayName: Set up Datahub GMS ingress
+                  inputs:
+                    namespace: $(kubernetesNamespace)
+                    command: apply
+                    useConfigurationFile: true
+                    configuration: $(Build.SourcesDirectory)/k8s/gms-ingress.yaml
+
   - stage: DeployPrerequisites
     displayName: Deploy Datahub Prerequisites
     jobs:
@@ -146,31 +174,3 @@ stages:
                       --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
                       --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=oi-datahub-secrets-dev
                       --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=oi-datahub-secrets-dev
-
-  - stage: CreateIngress
-    displayName: Create/update K8s ingress resource
-    jobs:
-      - deployment: Deploy
-        displayName: Create/update K8s ingress resource
-        environment: $(kubernetesEnvironment)
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-
-                - task: Kubernetes@1
-                  displayName: Set up Datahub ingress
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    command: apply
-                    useConfigurationFile: true
-                    configuration: $(Build.SourcesDirectory)/k8s/ingress-dev.yaml
-
-                - task: Kubernetes@1
-                  displayName: Set up Datahub GMS ingress
-                  inputs:
-                    namespace: $(kubernetesNamespace)
-                    command: apply
-                    useConfigurationFile: true
-                    configuration: $(Build.SourcesDirectory)/k8s/gms-ingress.yaml
