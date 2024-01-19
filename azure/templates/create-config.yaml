@@ -21,7 +21,9 @@ jobs:
                   metadata:
                     name: postgresql-secrets
                     labels:
-                      app: giga-datahub
+                      app.kubernetes.io/name: giga-datahub
+                      app.kubernetes.io/part-of: giga-dataops-platform
+                      app.kubernetes.io/component: datahub
                   stringData:
                     postgres-password: "$(postgresqlPass)"
 
@@ -38,7 +40,9 @@ jobs:
                   metadata:
                     name: neo4j-secrets
                     labels:
-                      app: giga-datahub
+                      app.kubernetes.io/name: giga-datahub
+                      app.kubernetes.io/part-of: giga-dataops-platform
+                      app.kubernetes.io/component: datahub
                   stringData:
                     neo4j-password: "$(neo4jPass)"
 
@@ -55,6 +59,8 @@ jobs:
                   metadata:
                     name: datahub-users-secret
                     labels:
-                      app: giga-datahub
+                      app.kubernetes.io/name: giga-datahub
+                      app.kubernetes.io/part-of: giga-dataops-platform
+                      app.kubernetes.io/component: datahub
                   stringData:
                     user.props: "$(datahubUserProps)"

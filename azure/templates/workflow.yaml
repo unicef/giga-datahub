@@ -1,0 +1,24 @@
+stages:
+  - stage: CreateConfig
+    displayName: Create/update K8s configuration resources
+    jobs:
+      - template: create-config.yaml
+
+  - stage: CreateIngress
+    displayName: Create/update K8s ingress resource
+    dependsOn: [ ]
+    jobs:
+      - template: create-ingress.yaml
+
+  - stage: DeployPrerequisites
+    displayName: Deploy Datahub Prerequisites
+    dependsOn:
+      - CreateConfig
+      - CreateIngress
+    jobs:
+      - template: deploy-prereq.yaml
+
+  - stage: DeployDatahub
+    displayName: Deploy Datahub
+    jobs:
+      - template: deploy-datahub.yaml

@@ -14,26 +14,4 @@ variables:
     value: stg
 
 stages:
-  - stage: CreateConfig
-    displayName: Create/update K8s configuration resources
-    jobs:
-      - template: templates/create-config.yaml
-
-  - stage: CreateIngress
-    displayName: Create/update K8s ingress resource
-    dependsOn: [ ]
-    jobs:
-      - template: templates/create-ingress.yaml
-
-  - stage: DeployPrerequisites
-    displayName: Deploy Datahub Prerequisites
-    dependsOn:
-      - CreateConfig
-      - CreateIngress
-    jobs:
-      - template: templates/deploy-prereq.yaml
-
-  - stage: DeployDatahub
-    displayName: Deploy Datahub
-    jobs:
-      - template: templates/deploy-datahub.yaml
+  - template: templates/workflow.yaml

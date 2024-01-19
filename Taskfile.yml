@@ -112,11 +112,13 @@ tasks:
         --create-namespace
         --timeout 1h
         --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
-        --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
+        --set datahub-frontend.oidcAuthentication.provider=google
         --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub
         --set datahub-frontend.oidcAuthentication.clientIdRef.secretKey=AUTH_OIDC_CLIENT_ID
         --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub
         --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
+
+  #        --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
 
   helm-down:
     desc: Uninstall Helm charts
