@@ -6,48 +6,15 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  kubernetesEnvironment: $(KUBERNETES_ENVIRONMENT)
-  kubernetesNamespace: $(KUBERNETES_NAMESPACE)
-  system.debug: true
+  - template: templates/variables.yaml
 
 stages:
-  - stage: Delete
-    displayName: Delete Datahub
+  - stage: Uninstall
+    displayName: Uninstall Datahub Helm charts
     jobs:
-      - deployment: Deploy
-        displayName: Delete Datahub
-        environment: $(kubernetesEnvironment)
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: HelmDeploy@0
-                  displayName: 'Delete Datahub Helm'
-                  continueOnError: true
-                  inputs:
-                    command: 'uninstall'
-                    arguments: 'datahub'
-                    namespace: $(kubernetesNamespace)
+      - template: templates/helm-uninstall.yaml
 
-                - task: HelmDeploy@0
-                  displayName: 'Delete Datahub Helm Prerequisites'
-                  continueOnError: true
-                  inputs:
-                    command: 'uninstall'
-                    arguments: 'prerequisites'
-                    namespace: $(kubernetesNamespace)
-
-                - task: Kubernetes@1
-                  displayName: Delete resources in namespace
-                  inputs:
-                    command: delete
-                    arguments: "all --all"
-                    namespace: $(kubernetesNamespace)
-
-                - task: Kubernetes@1
-                  displayName: Delete PVC in namespace
-                  continueOnError: true
-                  inputs:
-                    command: delete
-                    arguments: "pvc --all"
-                    namespace: $(kubernetesNamespace)
+  - stage: Delete
+    displayName: Delete Datahub K8s resources
+    jobs:
+      - template: templates/delete-resources.yaml
