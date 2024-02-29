@@ -1,0 +1,17 @@
+trigger:
+  branches:
+    include:
+      - production
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - template: templates/variables.yaml
+  - name: environment
+    value: prd
+
+stages:
+  - template: templates/workflow.yaml
