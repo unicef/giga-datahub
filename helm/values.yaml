@@ -44,7 +44,7 @@ datahub-frontend:
       - host: io-datahub-dev.unitst.org
         paths:
           - path: /
-            pathType: Exact
+            pathType: Prefix
         redirectPaths: [ ]
     tls: [ ]
   defaultUserCredentials: { }
@@ -64,6 +64,9 @@ datahub-frontend:
     - name: datahub-users
       mountPath: /datahub-frontend/conf/user.props
       subPath: user.props
+  extraEnvs:
+    - name: REACT_APP_LOGO_URL
+      value: "https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png"
   auth:
     sessionTTLHours: "24"
   oidcAuthentication:
@@ -592,7 +595,7 @@ global:
       #   value: password
 
   datahub:
-    version: v0.11.0
+    version: v0.12.0
     gms:
       port: "8080"
       nodePort: "30001"
@@ -624,7 +627,7 @@ global:
 
     managed_ingestion:
       enabled: true
-      defaultCliVersion: "0.11.0"
+      defaultCliVersion: "0.12.0"
 
     metadata_service_authentication:
       enabled: true
