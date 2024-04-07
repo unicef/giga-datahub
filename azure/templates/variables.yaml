@@ -5,4 +5,5 @@ variables:
   neo4jPass: $(NEO4J_PASS)
   datahubUserProps: $(DATAHUB_USER_PROPS)
   aadTenantId: $(AZURE_TENANT_ID)
+  deployEnv: $(DEPLOY_ENV)
   system.debug: true
