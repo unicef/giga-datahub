@@ -29,3 +29,4 @@ jobs:
                   --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
                   --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef="oi-datahub-secrets-$(deployEnv)"
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.ingress.hosts[0].host="io-datahub-$(deployEnv).unitst.org"
