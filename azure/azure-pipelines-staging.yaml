@@ -11,8 +11,6 @@ pool:
 
 variables:
   - template: templates/variables.yaml
-  - name: environment
-    value: stg
 
 stages:
   - template: templates/workflow.yaml

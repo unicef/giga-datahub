@@ -14,7 +14,7 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 command: apply
                 useConfigurationFile: true
-                configuration: "$(Build.SourcesDirectory)/k8s/ingress-$(environment).yaml"
+                configuration: "$(Build.SourcesDirectory)/k8s/ingress-$(deployEnv).yaml"
 
             - task: Kubernetes@1
               displayName: Set up Datahub GMS ingress

@@ -23,6 +23,7 @@ jobs:
                 command: upgrade
                 chartType: Name
                 chartName: datahub/datahub-prerequisites
+                chartVersion: 0.1.8
                 releaseName: prerequisites
                 namespace: $(kubernetesNamespace)
-                arguments: "--values $(Build.SourcesDirectory)/helm/prerequisites-values.yaml"
+                valueFile: helm/prerequisites-values.yaml

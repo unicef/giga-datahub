@@ -22,11 +22,10 @@ jobs:
                 chartType: FilePath
                 chartPath: $(Build.SourcesDirectory)/helm/datahub
                 releaseName: datahub
-                chartVersion: 0.4.0
                 valueFile: helm/values.yaml
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
                   --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
-                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef="oi-datahub-secrets-$(environment)"
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(environment)"
+                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"

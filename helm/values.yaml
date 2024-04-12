@@ -41,7 +41,7 @@ datahub-frontend:
       appgw.ingress.kubernetes.io/appgw-ssl-certificate: "kv-cert-unitst"
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
     hosts:
-      - host: io-datahub-dev.unitst.org
+      - host: ""
         paths:
           - path: /
             pathType: Prefix
