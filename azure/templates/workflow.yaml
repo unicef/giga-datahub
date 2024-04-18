@@ -6,7 +6,6 @@ stages:
 
   - stage: CreateIngress
     displayName: Create/update GMS ingress resource
-    condition: eq(variables.deployEnv, 'dev')
     dependsOn: [ ]
     jobs:
       - template: create-ingress.yaml
