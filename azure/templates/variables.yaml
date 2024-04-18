@@ -5,5 +5,8 @@ variables:
   neo4jPass: $(NEO4J_PASS)
   datahubUserProps: $(DATAHUB_USER_PROPS)
   aadTenantId: $(AZURE_TENANT_ID)
+  googleClientId: $(AUTH_OIDC_CLIENT_ID)
+  googleClientSecret: $(AUTH_OIDC_CLIENT_SECRET)
   deployEnv: $(DEPLOY_ENV)
+  ingressHost: $(INGRESS_HOST)
   system.debug: true

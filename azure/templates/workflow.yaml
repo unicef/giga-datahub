@@ -5,7 +5,8 @@ stages:
       - template: create-config.yaml
 
   - stage: CreateIngress
-    displayName: Create/update K8s ingress resource
+    displayName: Create/update GMS ingress resource
+    condition: eq(variables.deployEnv, 'dev')
     dependsOn: [ ]
     jobs:
       - template: create-ingress.yaml

@@ -17,6 +17,7 @@ jobs:
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub
+              condition: eq(variables.deployEnv, 'dev')
               inputs:
                 command: upgrade
                 chartType: FilePath
@@ -29,4 +30,24 @@ jobs:
                   --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
                   --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef="oi-datahub-secrets-$(deployEnv)"
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
-                  --set datahub-frontend.ingress.hosts[0].host="io-datahub-$(deployEnv).unitst.org"
+                  --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
+
+            - task: HelmDeploy@0
+              displayName: Helm deploy production-config Datahub
+              # FIXME: Temporary workaround while Azure AD secrets are not provided yet
+              condition: or(eq(variables.deployEnv, 'stg'), eq(variables.deployEnv, 'prd'))
+              inputs:
+                command: upgrade
+                chartType: FilePath
+                chartPath: $(Build.SourcesDirectory)/helm/datahub
+                releaseName: datahub
+                valueFile: helm/values.yaml
+                namespace: $(kubernetesNamespace)
+                arguments: >
+                  --timeout 1h
+                  --set datahub-frontend.oidcAuthentication.provider=google
+                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub-secrets
+                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretKey=AUTH_OIDC_CLIENT_ID
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
+                  --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"

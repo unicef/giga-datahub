@@ -64,3 +64,25 @@ jobs:
                       app.kubernetes.io/component: datahub
                   stringData:
                     user.props: "$(datahubUserProps)"
+
+            - task: Kubernetes@1
+              displayName: Create general Datahub secrets
+              # FIXME: Temporary workaround while Azure AD secrets are not provided yet
+              condition: or(eq(variables.deployEnv, 'stg'), eq(variables.deployEnv, 'prd'))
+              inputs:
+                namespace: $(kubernetesNamespace)
+                configurationType: inline
+                command: apply
+                useConfigurationFile: true
+                inline: |
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: giga-datahub-secrets
+                    labels:
+                      app.kubernetes.io/name: giga-datahub
+                      app.kubernetes.io/part-of: giga-dataops-platform
+                      app.kubernetes.io/component: datahub
+                  stringData:
+                    AUTH_OIDC_CLIENT_ID: "$(googleClientId)"
+                    AUTH_OIDC_CLIENT_SECRET: "$(googleClientSecret)"
