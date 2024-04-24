@@ -7,10 +7,11 @@ datahub-gms:
     # tag: "v0.11.0 # defaults to .global.datahub.version
   resources:
     limits:
+      cpu: 200m
       memory: 2Gi
     requests:
       cpu: 100m
-      memory: 1Gi
+      memory: 1536Mi
   service:
     type: ClusterIP
   # Optionally set a GMS specific SQL login (defaults to global login)
@@ -28,7 +29,8 @@ datahub-frontend:
     # tag: "v0.11.0" # # defaults to .global.datahub.version
   resources:
     limits:
-      memory: 1400Mi
+      cpu: 200m
+      memory: 1536Mi
     requests:
       cpu: 100m
       memory: 512Mi
@@ -92,6 +94,7 @@ acryl-datahub-actions:
   #   defaultMode: "0444"
   resources:
     limits:
+      cpu: 500m
       memory: 512Mi
     requests:
       cpu: 300m
@@ -103,6 +106,7 @@ datahub-mae-consumer:
     # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
+      cpu: 200m
       memory: 1536Mi
     requests:
       cpu: 100m
@@ -114,6 +118,7 @@ datahub-mce-consumer:
     # tag: "v0.11.0" # defaults to .global.datahub.version
   resources:
     limits:
+      cpu: 200m
       memory: 1536Mi
     requests:
       cpu: 100m
