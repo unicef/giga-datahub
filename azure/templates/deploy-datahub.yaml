@@ -17,7 +17,7 @@ jobs:
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub
-              condition: eq(variables.DEPLOY_ENV, 'dev')
+              condition: eq(variables.environment, 'dev')
               inputs:
                 command: upgrade
                 chartType: FilePath
@@ -35,7 +35,7 @@ jobs:
             - task: HelmDeploy@0
               displayName: Helm deploy production-config Datahub
               # FIXME: Temporary workaround while Azure AD secrets are not provided yet
-              condition: or(eq(variables.DEPLOY_ENV, 'stg'), eq(variables.DEPLOY_ENV, 'prd'))
+              condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
               inputs:
                 command: upgrade
                 chartType: FilePath
