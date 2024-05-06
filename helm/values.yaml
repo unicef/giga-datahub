@@ -7,10 +7,10 @@ datahub-gms:
     # tag: "v0.11.0 # defaults to .global.datahub.version
   resources:
     limits:
-      cpu: 1000m
+      cpu: 1500m
       memory: 2Gi
     requests:
-      cpu: 500m
+      cpu: 750m
       memory: 1536Mi
   service:
     type: ClusterIP
@@ -29,10 +29,10 @@ datahub-frontend:
     # tag: "v0.11.0" # # defaults to .global.datahub.version
   resources:
     limits:
-      cpu: 200m
+      cpu: 500m
       memory: 1536Mi
     requests:
-      cpu: 100m
+      cpu: 250m
       memory: 512Mi
   # Set up ingress to expose react front-end
   ingress:
