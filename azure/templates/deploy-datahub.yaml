@@ -20,18 +20,14 @@ jobs:
               condition: eq(variables.environment, 'dev')
               inputs:
                 command: upgrade
-                chartType: FilePath
-                chartPath: $(Build.SourcesDirectory)/helm/datahub
+                chartType: Name
+                chartName: datahub/datahub
+                chartVersion: 0.4.0
                 releaseName: datahub
                 valueFile: helm/values.yaml
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
-                  --set datahub-frontend.oidcAuthentication.azureTenantId=$(azureTenantId)
-                  --set datahub-frontend.oidcAuthentication.azureTenantName=$(azureTenantName)
-                  --set datahub-frontend.oidcAuthentication.azurePolicyName=$(azurePolicyName)
-                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub-secrets
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: HelmDeploy@0
@@ -40,8 +36,9 @@ jobs:
               condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
               inputs:
                 command: upgrade
-                chartType: FilePath
-                chartPath: $(Build.SourcesDirectory)/helm/datahub
+                chartType: Name
+                chartName: datahub/datahub
+                chartVersion: 0.4.0
                 releaseName: datahub
                 valueFile: helm/values.yaml
                 namespace: $(kubernetesNamespace)

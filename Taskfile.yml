@@ -96,9 +96,12 @@ tasks:
     cmds:
       - >
         helm upgrade --install prerequisites datahub/datahub-prerequisites
+        --version 0.1.8
         --values prerequisites-values.yaml
         --namespace giga-datahub
         --create-namespace
+        --set postgresql.primary.readinessProbe.enabled=false
+        --set postgresql.primary.livenessProbe.enabled=false
 
   helm-up-datahub:
     internal: true
@@ -106,19 +109,13 @@ tasks:
     dir: helm
     cmds:
       - >
-        helm upgrade --install datahub ./datahub
+        helm upgrade --install datahub datahub/datahub
+        --version 0.4.0
         --values values.yaml
         --namespace giga-datahub
         --create-namespace
         --timeout 1h
         --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
-        --set datahub-frontend.oidcAuthentication.provider=google
-        --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub
-        --set datahub-frontend.oidcAuthentication.clientIdRef.secretKey=AUTH_OIDC_CLIENT_ID
-        --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub
-        --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
-
-  #        --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
 
   helm-down:
     desc: Uninstall Helm charts
@@ -127,6 +124,12 @@ tasks:
     cmds:
       - helm uninstall datahub --namespace giga-datahub
       - helm uninstall prerequisites --namespace giga-datahub
+
+  helm-clean:
+    desc: Cleanup K8s resources
+    ignore_error: true
+    dir: k8s
+    cmds:
       - kubectl delete all --all --namespace giga-datahub
       - kubectl delete pvc --all --namespace giga-datahub
       - kubectl delete -f namespace.yaml

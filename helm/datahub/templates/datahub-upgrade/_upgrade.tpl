@@ -6,9 +6,9 @@ Return the env variables for upgrade jobs
 - name: ENTITY_REGISTRY_CONFIG_PATH
   value: /datahub/datahub-gms/resources/entity-registry.yml
 - name: DATAHUB_GMS_HOST
-  value: {{ printf "%s-%s" .Release.Name "datahub-gms" }}
+  value: {{ (((.Values.datahub).gms).host | default ((.Values.global.datahub).gms).host) | default (printf "%s-%s" .Release.Name "datahub-gms") | trunc 63 | trimSuffix "-"}}
 - name: DATAHUB_GMS_PORT
-  value: "{{ .Values.global.datahub.gms.port }}"
+  value: "{{ ((.Values.datahub).gms).port | default .Values.global.datahub.gms.port }}"
 - name: DATAHUB_MAE_CONSUMER_HOST
   value: {{ printf "%s-%s" .Release.Name "datahub-mae-consumer" }}
 - name: DATAHUB_MAE_CONSUMER_PORT
@@ -96,6 +96,8 @@ Return the env variables for upgrade jobs
   value: "{{ .Values.global.neo4j.host }}"
 - name: NEO4J_URI
   value: "{{ .Values.global.neo4j.uri }}"
+- name: NEO4J_DATABASE
+  value: "{{ .Values.global.neo4j.database | default "graph.db" }}"
 - name: NEO4J_USERNAME
   value: "{{ .Values.global.neo4j.username }}"
 - name: NEO4J_PASSWORD

@@ -1,0 +1,21 @@
+apiVersion: v2
+appVersion: 1.33.4
+description: Google Cloud SQL Proxy
+home: https://cloud.google.com/sql/docs/postgres/sql-proxy
+keywords:
+- google
+- cloud
+- postgresql
+- mysql
+- sql
+- sqlproxy
+maintainers:
+- email: rmocius@gmail.com
+  name: rimusz
+- email: naseemkullah@gmail.com
+  name: naseemkullah
+name: gcloud-sqlproxy
+sources:
+- https://github.com/rimusz/charts
+type: application
+version: 0.24.1

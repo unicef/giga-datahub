@@ -5,13 +5,25 @@ datahub-gms:
   image:
     repository: linkedin/datahub-gms
     # tag: "v0.11.0 # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
-      cpu: 1500m
       memory: 2Gi
     requests:
       cpu: 750m
       memory: 1536Mi
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 8
+  readinessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    failureThreshold: 8
+  # Optionaly specify service type for datahub-gms: LoadBalancer, ClusterIP or NodePort, by default: LoadBalancer
   service:
     type: ClusterIP
   # Optionally set a GMS specific SQL login (defaults to global login)
@@ -21,82 +33,86 @@ datahub-gms:
   #     password:
   #       secretRef: gms-secret
   #       secretKey: gms-password
+  extraEnvs:
+    - name: REACT_APP_LOGO_URL
+      value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
+    - name: REACT_APP_FAVICON_URL
+      value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png
 
 datahub-frontend:
   enabled: true
   image:
     repository: linkedin/datahub-frontend-react
     # tag: "v0.11.0" # # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
-      cpu: 500m
-      memory: 1536Mi
+      memory: 1400Mi
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
-    extraLabels: { }
-    annotations:
-      kubernetes.io/ingress.class: azure/application-gateway
-      appgw.ingress.kubernetes.io/appgw-ssl-certificate: "kv-cert-unitst"
-      appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    hosts:
-      - host: ""
-        paths:
-          - path: /
-            pathType: Prefix
-        redirectPaths: [ ]
-    tls: [ ]
   defaultUserCredentials: { }
   service:
-    type: ClusterIP
-  #  randomAdminPassword: true
-  #  # You can also set specific passwords for default users
-  #  # manualValues: |
-  #  #   datahub:manualPassword
-  #  #   initialViewer:manualPassword
-  extraVolumes:
-    - name: datahub-users
-      secret:
-        defaultMode: 0444
-        secretName: datahub-users-secret
-  extraVolumeMounts:
-    - name: datahub-users
-      mountPath: /datahub-frontend/conf/user.props
-      subPath: user.props
+    extraLabels: { }
+    # randomAdminPassword: true
+    # You can also set specific passwords for default users
+    # manualValues: |
+    #   datahub:manualPassword
+    #   initialViewer:manualPassword
+  # Optionaly specify service type for datahub-frontend: LoadBalancer, ClusterIP or NodePort, by default: LoadBalancer
+  # service:
+  #   type: ClusterIP
   extraEnvs:
+    - name: AUTH_OIDC_ENABLED
+      value: "true"
+    - name: AUTH_OIDC_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: giga-datahub-secrets
+          key: AZURE_CLIENT_ID
+    - name: AUTH_OIDC_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: giga-datahub-secrets
+          key: AZURE_CLIENT_SECRET
+    - name: AUTH_OIDC_DISCOVERY_URI
+      valueFrom:
+        secretKeyRef:
+          name: giga-datahub-secrets
+          key: AUTH_OIDC_DISCOVERY_URI
+    - name: AUTH_OIDC_BASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: giga-datahub-secrets
+          key: AUTH_OIDC_BASE_URL
+    - name: AUTH_OIDC_SCOPE
+      value: "openid profile email"
     - name: REACT_APP_LOGO_URL
-      value: "https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png"
-  auth:
-    sessionTTLHours: "24"
-  oidcAuthentication:
-    enabled: true
-    provider: azure
-    clientIdRef:
-      secretRef: ""
-      secretKey: AZURE_CLIENT_ID
-    clientSecretRef:
-      secretRef: ""
-      secretKey: AZURE_CLIENT_SECRET
-    azureTenantId: ""
-    azureTenantName: ""
-    azurePolicyName: ""
-    scope: "openid profile email"
+      value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
+    - name: REACT_APP_FAVICON_URL
+      value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png
 
 acryl-datahub-actions:
   enabled: true
   image:
     repository: acryldata/datahub-actions
     tag: "v0.0.11"
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   # mount the k8s secret as a volume in the container, each key name is mounted as a file on the mount path /etc/datahub/ingestion-secret-files
   # ingestionSecretFiles:
   #   name: ${K8S_SECRET_NAME}
   #   defaultMode: "0444"
   resources:
     limits:
-      cpu: 500m
       memory: 512Mi
     requests:
       cpu: 300m
@@ -106,9 +122,12 @@ datahub-mae-consumer:
   image:
     repository: linkedin/datahub-mae-consumer
     # tag: "v0.11.0" # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
-      cpu: 200m
       memory: 1536Mi
     requests:
       cpu: 100m
@@ -118,9 +137,12 @@ datahub-mce-consumer:
   image:
     repository: linkedin/datahub-mce-consumer
     # tag: "v0.11.0" # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
-      cpu: 200m
       memory: 1536Mi
     requests:
       cpu: 100m
@@ -137,6 +159,10 @@ elasticsearchSetupJob:
   image:
     repository: linkedin/datahub-elasticsearch-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
       cpu: 500m
@@ -167,6 +193,10 @@ kafkaSetupJob:
   image:
     repository: linkedin/datahub-kafka-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
       cpu: 500m
@@ -197,6 +227,10 @@ mysqlSetupJob:
   image:
     repository: acryldata/datahub-mysql-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
       cpu: 500m
@@ -232,6 +266,10 @@ postgresqlSetupJob:
   image:
     repository: acryldata/datahub-postgres-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   resources:
     limits:
       cpu: 500m
@@ -275,7 +313,12 @@ datahubUpgrade:
   batchSize: 1000
   batchDelayMs: 100
   noCodeDataMigration:
-    #    sqlDbType: "MYSQL"
+    image:
+      # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+      # to run
+      command:
+      args: [ ]
+    # sqlDbType: "MYSQL"
     sqlDbType: "POSTGRES"
   podSecurityContext: { }
   # fsGroup: 1000
@@ -294,6 +337,11 @@ datahubUpgrade:
   #   image: my-image
   #   imagePullPolicy: Always
   cleanupJob:
+    image:
+      # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+      # to run
+      command:
+      args: [ ]
     resources:
       limits:
         cpu: 500m
@@ -301,12 +349,19 @@ datahubUpgrade:
       requests:
         cpu: 300m
         memory: 256Mi
+    # Add the concurrency Policy flexibility via values
+    concurrencyPolicy: Allow
     # Add extra sidecar containers to job pod
     extraSidecars: [ ]
     # - name: my-image-name
     #   image: my-image
     #   imagePullPolicy: Always
   restoreIndices:
+    image:
+      # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+      # to run
+      command:
+      args: [ ]
     resources:
       limits:
         cpu: 500m
@@ -314,6 +369,8 @@ datahubUpgrade:
       requests:
         cpu: 300m
         memory: 256Mi
+    # Add the concurrency Policy flexibility via values
+    concurrencyPolicy: Allow
     # Add extra sidecar containers to job pod
     extraSidecars: [ ]
     # - name: my-image-name
@@ -331,6 +388,10 @@ datahubSystemUpdate:
   image:
     repository: acryldata/datahub-upgrade
     # tag:
+    # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+    # to run
+    # command: customCommand
+    # args: []
   podSecurityContext: { }
   # fsGroup: 1000
   securityContext: { }
@@ -341,6 +402,21 @@ datahubSystemUpdate:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-4"
     helm.sh/hook-delete-policy: before-hook-creation
+  # !! Requires version v0.13.0 or greater
+  # Split the system update into 2 jobs, one that is blocking the rest of
+  # the deployment and the other which is non-blocking. Once the blocking
+  # steps are completed, the non-blocking job runs while the rest of the
+  # system is starting.
+  nonblocking:
+    enabled: false
+    # When mode = 'nonblocking' the nonblocking job should not include the above helm.sh/hook annotations
+    annotations: { }
+    image:
+      args:
+      # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
+      # to run
+      # command: customCommand
+      # args: []
   podAnnotations: { }
   resources:
     limits:
@@ -529,6 +605,13 @@ global:
       metadata_change_log_timeseries_topic_name: "MetadataChangeLog_Timeseries_v1"
       platform_event_topic_name: "PlatformEvent_v1"
       datahub_upgrade_history_topic_name: "DataHubUpgradeHistory_v1"
+    maxMessageBytes: "5242880"  # 5MB
+    producer:
+      compressionType: none
+      maxRequestSize: "5242880"  # 5MB
+    consumer:
+      maxPartitionFetchBytes: "5242880"  # 5MB
+      stopContainerOnDeserializationError: true
     ## For AWS MSK set this to a number larger than 1
     # partitions: 3
     # replicationFactor: 3
@@ -604,11 +687,17 @@ global:
   datahub:
     version: v0.12.0
     gms:
+      protocol: "http"
       port: "8080"
       nodePort: "30001"
 
+    frontend:
+      validateSignUpEmail: true
+
     monitoring:
       enablePrometheus: true
+      # Set a custom name for the monitoring port
+      portName: jmx
 
     mae_consumer:
       port: "9091"
@@ -668,9 +757,9 @@ global:
 
     ## Values specific to the unified search and browse feature.
     search_and_browse:
-      show_search_v2: false  # If on, show the new search filters experience as of v0.10.5
-      show_browse_v2: false  # If on, show the new browse experience as of v0.10.5
-      backfill_browse_v2: false  # If on, run the backfill upgrade job that generates default browse paths for relevant entities
+      show_search_v2: true  # If on, show the new search filters experience as of v0.10.5
+      show_browse_v2: true  # If on, show the new browse experience as of v0.10.5
+      backfill_browse_v2: true  # If on, run the backfill upgrade job that generates default browse paths for relevant entities
 
 #  hostAliases:
 #    - ip: "192.168.0.104"
@@ -701,3 +790,5 @@ global:
 #    ssl.truststore.type: JKS
 #    ssl.protocol: TLS
 #    ssl.endpoint.identification.algorithm:
+#    basic.auth.credentials.source: USER_INFO
+#    basic.auth.user.info:
