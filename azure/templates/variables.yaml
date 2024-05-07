@@ -4,9 +4,12 @@ variables:
   postgresqlPass: $(POSTGRESQL_PASS)
   neo4jPass: $(NEO4J_PASS)
   datahubUserProps: $(DATAHUB_USER_PROPS)
-  aadTenantId: $(AZURE_TENANT_ID)
+  # aadTenantId: $(AZURE_TENANT_ID)
   googleClientId: $(AUTH_OIDC_CLIENT_ID)
   googleClientSecret: $(AUTH_OIDC_CLIENT_SECRET)
   deployEnv: $(DEPLOY_ENV)
   ingressHost: $(INGRESS_HOST)
+  azureClientId: $(TEMP_AZURE_CLIENT_ID)
+  azureClientSecret: $(TEMP_AZURE_CLIENT_SECRET)
+  azureTenantId: $(TEMP_AZURE_TENANT_ID)
   system.debug: true

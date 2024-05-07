@@ -27,9 +27,9 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
-                  --set datahub-frontend.oidcAuthentication.azureTenantId=$(aadTenantId)
-                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef="oi-datahub-secrets-$(deployEnv)"
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.oidcAuthentication.azureTenantId=$(azureTenantId)
+                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub-secrets
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: HelmDeploy@0
