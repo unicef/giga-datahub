@@ -12,4 +12,6 @@ variables:
   azureClientId: $(TEMP_AZURE_CLIENT_ID)
   azureClientSecret: $(TEMP_AZURE_CLIENT_SECRET)
   azureTenantId: $(TEMP_AZURE_TENANT_ID)
+  azureTenantName: $(TEMP_AZURE_TENANT_NAME)
+  azurePolicyName: $(TEMP_AZURE_POLICY_NAME)
   system.debug: true

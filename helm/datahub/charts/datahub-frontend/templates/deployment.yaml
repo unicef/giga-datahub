@@ -227,7 +227,7 @@ spec:
               value: {{ .scope | default "openid profile email groups" }}
             {{- else if eq .provider "azure" }}
             - name: AUTH_OIDC_DISCOVERY_URI
-              value: https://login.microsoftonline.com/{{ .azureTenantId }}/v2.0/.well-known/openid-configuration
+              value: https://{{ .azureTenantName }}.b2clogin.com/{{ .azureTenantName }}.onmicrosoft.com/{{ .azurePolicyName }}/v2.0/.well-known/openid-configuration
             - name: AUTH_OIDC_SCOPE
               value: {{ .scope | default "openid profile email" }}
             {{- else }}

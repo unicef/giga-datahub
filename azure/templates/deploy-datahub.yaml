@@ -28,6 +28,8 @@ jobs:
                 arguments: >
                   --timeout 1h
                   --set datahub-frontend.oidcAuthentication.azureTenantId=$(azureTenantId)
+                  --set datahub-frontend.oidcAuthentication.azureTenantName=$(azureTenantName)
+                  --set datahub-frontend.oidcAuthentication.azurePolicyName=$(azurePolicyName)
                   --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub-secrets
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"

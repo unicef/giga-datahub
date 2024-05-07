@@ -81,6 +81,8 @@ datahub-frontend:
       secretRef: ""
       secretKey: AZURE_CLIENT_SECRET
     azureTenantId: ""
+    azureTenantName: ""
+    azurePolicyName: ""
     scope: "openid profile email"
 
 acryl-datahub-actions:
