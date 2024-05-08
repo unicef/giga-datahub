@@ -50,3 +50,10 @@ jobs:
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
+
+            - task: Kubernetes@1
+              displayName: Force restart Datahub frontend
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: rollout
+                arguments: restart deploy datahub-datahub-frontend
