@@ -83,14 +83,12 @@ tasks:
       - kubectl apply -f secrets.yaml --namespace giga-datahub
 
   k8s-ingress:
-    internal: true
     desc: Install k8s ingress
     dir: k8s
     cmds:
       - kubectl apply -f ingress-local.yaml --namespace giga-datahub
 
   helm-up-prereqs:
-    internal: true
     desc: Install/upgrade Datahub prerequisites
     dir: helm
     cmds:
@@ -104,7 +102,6 @@ tasks:
         --set postgresql.primary.livenessProbe.enabled=false
 
   helm-up-datahub:
-    internal: true
     desc: Install/upgrade Datahub
     dir: helm
     cmds:

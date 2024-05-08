@@ -94,6 +94,7 @@ jobs:
                     AZURE_CLIENT_SECRET: "$(azureClientSecret)"
                     AUTH_OIDC_DISCOVERY_URI: "https://$(azureTenantName).b2clogin.com/$(azureTenantName).onmicrosoft.com/$(azurePolicyName)/v2.0/.well-known/openid-configuration"
                     AUTH_OIDC_BASE_URL: "https://$(ingressHost)"
+                    AUTH_OIDC_SCOPE: "openid https://$(azureTenantName).onmicrosoft.com/$(azureClientId)/User.Impersonate"
 
             - task: Kubernetes@1
               displayName: Create general production-config Datahub secrets
