@@ -53,7 +53,7 @@ datahub-frontend:
       memory: 1400Mi
     requests:
       cpu: 100m
-      memory: 512Mi
+      memory: 768Mi
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
