@@ -6,6 +6,7 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/appgw-ssl-certificate: "kv-cert-unitst"
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/request-timeout: "180"
 spec:
   rules:
     - host: io-datahub-dev.unitst.org

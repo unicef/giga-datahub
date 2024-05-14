@@ -57,6 +57,14 @@ datahub-frontend:
   # Set up ingress to expose react front-end
   ingress:
     enabled: false
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway
+      appgw.ingress.kubernetes.io/appgw-ssl-certificate: "kv-cert-unitst"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/request-timeout: "180"
+    hosts:
+      - host: ""
+        paths: [ "/" ]
   defaultUserCredentials: { }
   service:
     extraLabels: { }

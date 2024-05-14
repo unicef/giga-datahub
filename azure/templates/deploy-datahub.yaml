@@ -28,6 +28,7 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
+                  --set datahub-frontend.ingress.enabled=true
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: HelmDeploy@0
@@ -49,6 +50,7 @@ jobs:
                   --set datahub-frontend.oidcAuthentication.clientIdRef.secretKey=AUTH_OIDC_CLIENT_ID
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
+                  --set datahub-frontend.ingress.enabled=true
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: Kubernetes@1
