@@ -9,6 +9,8 @@ datahub-gms:
     # to run
     # command: customCommand
     # args: []
+  podAnnotations:
+    co.elastic.logs/enabled: "true"
   resources:
     limits:
       memory: 2Gi
