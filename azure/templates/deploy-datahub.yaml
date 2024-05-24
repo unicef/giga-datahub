@@ -32,9 +32,9 @@ jobs:
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: HelmDeploy@0
-              displayName: Helm deploy production-config Datahub
+              displayName: Helm deploy staging-config Datahub
               # FIXME: Temporary workaround while Azure AD secrets are not provided yet
-              condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
+              condition: eq(variables.environment, 'stg')
               inputs:
                 command: upgrade
                 chartType: Name
@@ -52,6 +52,25 @@ jobs:
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
                   --set datahub-frontend.ingress.enabled=true
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
+
+            - task: HelmDeploy@0
+              displayName: Helm deploy production-config Datahub
+              condition: eq(variables.environment, 'prd')
+              inputs:
+                command: upgrade
+                chartType: Name
+                chartName: datahub/datahub
+                chartVersion: 0.4.0
+                releaseName: datahub
+                valueFile: helm/values.yaml
+                namespace: $(kubernetesNamespace)
+                arguments: >
+                  --timeout 1h
+                  --values helm/values-override-prd.yaml
+                  --set datahub-frontend.ingress.enabled=true
+                  --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
+                  --set datahub-frontend.extraEnvs[1].valueFrom.secretKeyRef.name=oi-datahub-secrets-$(deployEnv)
+                  --set datahub-frontend.extraEnvs[2].valueFrom.secretKeyRef.name=oi-datahub-secrets-$(deployEnv)
 
             - task: Kubernetes@1
               displayName: Force restart Datahub frontend
