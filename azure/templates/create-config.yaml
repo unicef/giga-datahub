@@ -115,5 +115,6 @@ jobs:
                       app.kubernetes.io/part-of: giga-dataops-platform
                       app.kubernetes.io/component: datahub
                   stringData:
-                    AUTH_OIDC_CLIENT_ID: "$(googleClientId)"
-                    AUTH_OIDC_CLIENT_SECRET: "$(googleClientSecret)"
+                    AUTH_OIDC_DISCOVERY_URI: "https://$(azureTenantName).b2clogin.com/$(azureTenantName).onmicrosoft.com/$(azurePolicyName)/v2.0/.well-known/openid-configuration"
+                    AUTH_OIDC_BASE_URL: "https://$(ingressHost)"
+                    AUTH_OIDC_SCOPE: "openid profile offline_access"
