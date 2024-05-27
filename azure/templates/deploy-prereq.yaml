@@ -18,6 +18,7 @@ jobs:
             - task: HelmDeploy@0
               displayName: Deploy Datahub Prerequisites
               enabled: true
+              continueOnError: true
               condition: eq(variables.environment, 'dev')
               inputs:
                 command: upgrade
@@ -31,6 +32,7 @@ jobs:
             - task: HelmDeploy@0
               displayName: Deploy production-config Datahub Prerequisites
               enabled: true
+              continueOnError: true
               condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
               inputs:
                 command: upgrade
