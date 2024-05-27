@@ -28,6 +28,7 @@ jobs:
                 releaseName: prerequisites
                 namespace: $(kubernetesNamespace)
                 valueFile: helm/prerequisites-values.yaml
+                arguments: --values helm/prerequisites-values-dev-override.yaml
 
             - task: HelmDeploy@0
               displayName: Deploy production-config Datahub Prerequisites
@@ -42,5 +43,4 @@ jobs:
                 releaseName: prerequisites
                 namespace: $(kubernetesNamespace)
                 valueFile: helm/prerequisites-values.yaml
-                arguments: >
-                  --values helm/prerequisites-values-prd-override.yaml
+                arguments: --values helm/prerequisites-values-prd-override.yaml
