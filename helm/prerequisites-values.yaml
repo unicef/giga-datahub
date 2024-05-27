@@ -16,7 +16,7 @@ elasticsearch:
   clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
   # # Shrink default JVM heap.
-  esJavaOpts: "-Xmx1024m -Xms1024m"
+  esJavaOpts: "-Xmx4G -Xms4G"
 
   # # Allocate smaller chunks of memory per pod.
   resources:
@@ -24,10 +24,10 @@ elasticsearch:
     # The other half will be taken up by Lucene
     requests:
       cpu: "100m"
-      memory: "2048M"
+      memory: "8G"
     limits:
       cpu: "1000m"
-      memory: "2048M"
+      memory: "8G"
 
   # # Request smaller persistent volumes.
   # volumeClaimTemplate:
