@@ -74,7 +74,8 @@ jobs:
 
             - task: Kubernetes@1
               displayName: Create general Datahub secrets
-              condition: eq(variables.environment, 'dev')
+              # FIXME: Temporary workaround while Azure AD B2C secrets are being tested
+              condition: or(eq(variables.environment, 'dev'), eq(variables.environment, 'stg'))
               inputs:
                 namespace: $(kubernetesNamespace)
                 configurationType: inline
@@ -98,8 +99,7 @@ jobs:
 
             - task: Kubernetes@1
               displayName: Create general production-config Datahub secrets
-              # FIXME: Temporary workaround while Azure AD secrets are not provided yet
-              condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
+              condition: eq(variables.environment, 'prd')
               inputs:
                 namespace: $(kubernetesNamespace)
                 configurationType: inline
