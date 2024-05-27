@@ -1,0 +1,19 @@
+elasticsearch:
+  enabled: true
+  replicas: 3
+  minimumMasterNodes: 1
+  antiAffinity: null
+
+  # # Shrink default JVM heap.
+  esJavaOpts: "-Xmx1366M -Xms1366M"
+
+  # # Allocate smaller chunks of memory per pod.
+  resources:
+    # Set memory to be double the JVM heap
+    # The other half will be taken up by Lucene
+    requests:
+      cpu: "300m"
+      memory: "2732M"
+    limits:
+      cpu: "1000m"
+      memory: "2732M"

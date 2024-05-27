@@ -41,5 +41,4 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 valueFile: helm/prerequisites-values.yaml
                 arguments: >
-                  --set elasticsearch.replicas=3
-                  --set elasticsearch.antiAffinity=null
+                  --values helm/prerequisites-values-prd-override.yaml
