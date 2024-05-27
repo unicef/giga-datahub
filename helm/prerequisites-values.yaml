@@ -23,7 +23,7 @@ elasticsearch:
     # Set memory to be double the JVM heap
     # The other half will be taken up by Lucene
     requests:
-      cpu: "100m"
+      cpu: "1000m"
       memory: "8G"
     limits:
       cpu: "1000m"

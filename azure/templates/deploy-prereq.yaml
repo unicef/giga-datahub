@@ -18,7 +18,7 @@ jobs:
             - task: HelmDeploy@0
               displayName: Deploy Datahub Prerequisites
               enabled: true
-              continueOnError: true
+              condition: eq(variables.environment, 'dev')
               inputs:
                 command: upgrade
                 chartType: Name
@@ -27,3 +27,19 @@ jobs:
                 releaseName: prerequisites
                 namespace: $(kubernetesNamespace)
                 valueFile: helm/prerequisites-values.yaml
+
+            - task: HelmDeploy@0
+              displayName: Deploy production-config Datahub Prerequisites
+              enabled: true
+              condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
+              inputs:
+                command: upgrade
+                chartType: Name
+                chartName: datahub/datahub-prerequisites
+                chartVersion: 0.1.8
+                releaseName: prerequisites
+                namespace: $(kubernetesNamespace)
+                valueFile: helm/prerequisites-values.yaml
+                arguments: >
+                  --set elasticsearch.replicas=3
+                  --set elasticsearch.antiAffinity=null
