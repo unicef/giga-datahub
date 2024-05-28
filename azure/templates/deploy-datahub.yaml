@@ -23,8 +23,9 @@ jobs:
                 arguments: datahub
 
             - task: HelmDeploy@0
-              displayName: Helm deploy Datahub
-              condition: eq(variables.environment, 'dev')
+              displayName: Helm deploy Datahub dev/stg
+              # Uses Entra ID
+              condition: or(eq(variables.environment, 'dev'), eq(variables.environment, 'stg'))
               inputs:
                 command: upgrade
                 chartType: Name
@@ -35,33 +36,15 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
-                  --set datahub-frontend.ingress.enabled=true
+                  --values helm/values-override-dev-stg.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
+                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
 
             - task: HelmDeploy@0
-              displayName: Helm deploy staging-config Datahub
-              # FIXME: Temporary workaround while Azure AD secrets are not provided yet
-              condition: eq(variables.environment, 'stg')
-              inputs:
-                command: upgrade
-                chartType: Name
-                chartName: datahub/datahub
-                chartVersion: 0.4.0
-                releaseName: datahub
-                valueFile: helm/values.yaml
-                namespace: $(kubernetesNamespace)
-                arguments: >
-                  --timeout 1h
-                  --set datahub-frontend.oidcAuthentication.provider=google
-                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretRef=giga-datahub-secrets
-                  --set datahub-frontend.oidcAuthentication.clientIdRef.secretKey=AUTH_OIDC_CLIENT_ID
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretKey=AUTH_OIDC_CLIENT_SECRET
-                  --set datahub-frontend.ingress.enabled=true
-                  --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
-
-            - task: HelmDeploy@0
-              displayName: Helm deploy production-config Datahub
+              displayName: Helm deploy Datahub prd
+              # Uses B2C
               condition: eq(variables.environment, 'prd')
               inputs:
                 command: upgrade
@@ -74,10 +57,7 @@ jobs:
                 arguments: >
                   --timeout 1h
                   --values helm/values-override-prd.yaml
-                  --set datahub-frontend.ingress.enabled=true
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
-                  --set datahub-frontend.extraEnvs[1].valueFrom.secretKeyRef.name=oi-datahub-secrets-$(deployEnv)
-                  --set datahub-frontend.extraEnvs[2].valueFrom.secretKeyRef.name=oi-datahub-secrets-$(deployEnv)
 
             - task: Kubernetes@1
               displayName: Force restart Datahub frontend

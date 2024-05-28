@@ -1,0 +1,19 @@
+datahub-frontend:
+  oidcAuthentication:
+    enabled: true
+    provider: azure
+    clientSecretRef:
+      secretRef: ""
+      secretKey: AZURE_CLIENT_SECRET
+    azureTenantId: ""
+    scope: "User.Read openid profile email"
+  extraEnvs:
+    - name: AUTH_OIDC_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: oi-datahub-secrets
+          key: AZURE_CLIENT_ID
+    - name: REACT_APP_LOGO_URL
+      value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
+    - name: REACT_APP_FAVICON_URL
+      value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png

@@ -16,7 +16,7 @@ elasticsearch:
   clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
   # # Shrink default JVM heap.
-  esJavaOpts: "-Xmx1366M -Xmx1366M"
+  esJavaOpts: "-Xmx1366M -Xms1366M"
 
   # # Allocate smaller chunks of memory per pod.
   resources:
