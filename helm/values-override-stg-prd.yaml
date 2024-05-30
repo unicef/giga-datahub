@@ -1,0 +1,3 @@
+global:
+  elasticsearch:
+    host: elasticsearch-master-headless

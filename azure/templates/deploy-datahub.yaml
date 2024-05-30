@@ -37,6 +37,7 @@ jobs:
                 arguments: >
                   --timeout 1h
                   --values helm/values-override-dev-stg.yaml
+                  --values helm/values-override-stg-prd.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
                   --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
@@ -57,6 +58,7 @@ jobs:
                 arguments: >
                   --timeout 1h
                   --values helm/values-override-prd.yaml
+                  --values helm/values-override-stg-prd.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: Kubernetes@1

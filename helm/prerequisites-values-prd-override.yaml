@@ -5,7 +5,7 @@ elasticsearch:
   antiAffinity: null
 
   # # Shrink default JVM heap.
-  esJavaOpts: "-Xmx1366M -Xms1366M"
+  esJavaOpts: "-Xmx1500M -Xms1500M"
 
   # # Allocate smaller chunks of memory per pod.
   resources:
@@ -13,7 +13,7 @@ elasticsearch:
     # The other half will be taken up by Lucene
     requests:
       cpu: "300m"
-      memory: "2732M"
+      memory: "3G"
     limits:
       cpu: "1000m"
-      memory: "2732M"
+      memory: "3G"
