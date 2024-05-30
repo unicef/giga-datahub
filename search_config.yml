@@ -78,3 +78,22 @@ queryConfigurations:
         - <<: *boostDeltaLake
       score_mode: multiply
       boost_mode: multiply
+
+
+autocompleteConfigurations:
+  - queryRegex: .*
+    defaultQuery: true
+
+    boolQuery:
+      <<: *buryDeprecated
+
+    functionScore:
+      functions:
+        - filter:
+            term:
+              materialized:
+                value: true
+          weight: 1.1
+        - <<: *boostDeltaLake
+      score_mode: multiply
+      boost_mode: multiply
