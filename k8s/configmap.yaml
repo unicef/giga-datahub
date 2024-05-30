@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: giga-datahub-configmap
+data:
+  custom_search_config.yml: |
+    x-function-boost-delta-lake: &boostDeltaLake
+      filter:
+        term:
+          platform.keyword:
+            - urn:li:dataPlatform:deltaLake
+      weight: 3.0
+    x-exclude-deprecated: &excludeDeprecated
+      must_not:
+        term:
+          deprecated:
+            value: true
+    x-bury-user: &buryUser
+      filter:
+        term:
+          type.keyword:
+            - urn:li:corpUser
+            - urn:li:corpGroup
+        weight: 0.5
+    queryConfigurations:
+      # Select *
+      - queryRegex: '[*]|'
+        simpleQuery: false
+        prefixMatchQuery: false
+        exactMatchQuery: false
+        boolQuery:
+          <<: *excludeDeprecated
+        functionScore:
+          functions:
+            - filter:
+                term:
+                  materialized:
+                    value: true
+              weight: 0.8
+            - <<: *boostDeltaLake
+            - <<: *buryUser
+          score_mode: multiply
+          boost_mode: multiply
+      # Criteria for exact-match only
+      # Contains quoted then use exact match query
+      - queryRegex: >-
+          ["'].+["']
+        simpleQuery: false
+        prefixMatchQuery: true
+        exactMatchQuery: true
+        functionScore:
+          functions:
+            - filter:
+                term:
+                  materialized:
+                    value: true
+              weight: 0.8
+            - filter:
+                term:
+                  deprecated:
+                    value: true
+              weight: 0
+          score_mode: multiply
+          boost_mode: multiply
+      # default
+      - queryRegex: .*
+        simpleQuery: true
+        prefixMatchQuery: true
+        exactMatchQuery: true
+        boolQuery:
+          <<: *excludeDeprecated
+        functionScore:
+          functions:
+            - filter:
+                term:
+                  materialized:
+                    value: true
+              weight: 0.8
+            - <<: *boostDeltaLake
+            - <<: *buryUser
+          score_mode: multiply
+          boost_mode: multiply
+    autocompleteConfigurations:
+      - queryRegex: .*
+        defaultQuery: true
+        boolQuery:
+          <<: *excludeDeprecated
+        functionScore:
+          functions:
+            - filter:
+                term:
+                  materialized:
+                    value: true
+              weight: 1.1
+            - <<: *boostDeltaLake
+            - <<: *buryUser
+          score_mode: multiply
+          boost_mode: multiply
