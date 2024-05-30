@@ -1,3 +1,5 @@
+x-do-setup-jobs: &doSetupJobs true
+
 # Values to start up datahub after starting up the datahub-prerequisites chart with "prerequisites" release name
 # Copy this chart and change configuration as needed.
 datahub-gms:
@@ -150,7 +152,7 @@ datahub-ingestion-cron:
     # tag: "v0.11.0" # defaults to .global.datahub.version
 
 elasticsearchSetupJob:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-elasticsearch-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -184,7 +186,7 @@ elasticsearchSetupJob:
   #   imagePullPolicy: Always
 
 kafkaSetupJob:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-kafka-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -257,7 +259,7 @@ mysqlSetupJob:
   #   imagePullPolicy: Always
 
 postgresqlSetupJob:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-postgres-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -301,7 +303,7 @@ postgresqlSetupJob:
 
 ## No code data migration
 datahubUpgrade:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-upgrade
     # tag: "v0.11.0"  # defaults to .global.datahub.version
@@ -508,7 +510,7 @@ global:
         maxResult: 10000
 
       custom:
-        enabled: false
+        enabled: true
         # See documentation: https://datahubproject.io/docs/how/search/#customizing-search
         config:
           # Notes:
@@ -538,6 +540,17 @@ global:
                         materialized:
                           value: true
                     weight: 0.8
+                  - filter:
+                      terms:
+                        platform.keyword:
+                          - urn:li:dataPlatform:deltaLake
+                    weight: 3.0
+                  - filter:
+                      terms:
+                        type.keyword:
+                          - urn:li:corpUser
+                          - urn:li:corpGroup
+                    weight: 0.5
                 score_mode: multiply
                 boost_mode: multiply
 
@@ -579,6 +592,17 @@ global:
                         materialized:
                           value: true
                     weight: 0.8
+                  - filter:
+                      terms:
+                        platform.keyword:
+                          - urn:li:dataPlatform:deltaLake
+                    weight: 3.0
+                  - filter:
+                      terms:
+                        type.keyword:
+                          - urn:li:corpUser
+                          - urn:li:corpGroup
+                    weight: 0.5
                 score_mode: multiply
                 boost_mode: multiply
 
@@ -702,7 +726,7 @@ global:
     systemUpdate:
       ## The following options control settings for datahub-upgrade job which will
       ## managed ES indices and other update related work
-      enabled: true
+      enabled: *doSetupJobs
 
     encryptionKey:
       secretRef: "datahub-encryption-secrets"
