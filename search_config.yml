@@ -7,6 +7,19 @@
 # functionScores - See the following for function score syntax
 # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/query-dsl-function-score-query.html
 
+x-function-boost-delta-lake: &boostDeltaLake
+  filter:
+    term:
+      platform.keyword:
+        - urn:li:dataPlatform:deltaLake
+  weight: 3.0
+
+x-bury-deprecated: &buryDeprecated
+  must_not:
+    term:
+      deprecated:
+        value: true
+
 queryConfigurations:
   # Select *
   - queryRegex: '[*]|'
@@ -14,10 +27,7 @@ queryConfigurations:
     prefixMatchQuery: false
     exactMatchQuery: false
     boolQuery:
-      must_not:
-        term:
-          deprecated:
-            value: true
+      <<: *buryDeprecated
     functionScore:
       functions:
         - filter:
@@ -25,6 +35,7 @@ queryConfigurations:
               materialized:
                 value: true
           weight: 0.8
+        - <<: *boostDeltaLake
       score_mode: multiply
       boost_mode: multiply
 
@@ -56,10 +67,7 @@ queryConfigurations:
     prefixMatchQuery: true
     exactMatchQuery: true
     boolQuery:
-      must_not:
-        term:
-          deprecated:
-            value: true
+      <<: *buryDeprecated
     functionScore:
       functions:
         - filter:
@@ -67,5 +75,6 @@ queryConfigurations:
               materialized:
                 value: true
           weight: 0.8
+        - <<: *boostDeltaLake
       score_mode: multiply
       boost_mode: multiply
