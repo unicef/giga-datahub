@@ -72,7 +72,6 @@ tasks:
       - task: k8s-prereqs
       - task: helm-up-prereqs
       - task: helm-up-datahub
-      - task: k8s-ingress
 
   k8s-prereqs:
     internal: true
@@ -82,12 +81,6 @@ tasks:
       - kubectl apply -f namespace.yaml
       - kubectl apply -f secrets.yaml --namespace giga-datahub
 
-  k8s-ingress:
-    desc: Install k8s ingress
-    dir: k8s
-    cmds:
-      - kubectl apply -f ingress-local.yaml --namespace giga-datahub
-
   helm-up-prereqs:
     desc: Install/upgrade Datahub prerequisites
     dir: helm
@@ -96,10 +89,13 @@ tasks:
         helm upgrade --install prerequisites datahub/datahub-prerequisites
         --version 0.1.8
         --values prerequisites-values.yaml
+        --values prerequisites-values-local-override.yaml
+        --values prerequisites-values-prd-override.yaml
         --namespace giga-datahub
         --create-namespace
         --set postgresql.primary.readinessProbe.enabled=false
         --set postgresql.primary.livenessProbe.enabled=false
+        --set elasticsearch.ingress.hosts[0].host={{.DATAHUB_ES_INGRESS_HOST}}
 
   helm-up-datahub:
     desc: Install/upgrade Datahub
@@ -114,6 +110,7 @@ tasks:
         --create-namespace
         --timeout 1h
         --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
+        --set datahub-frontend.ingress.annotations=null
         --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
         --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
         --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name=giga-datahub-secrets

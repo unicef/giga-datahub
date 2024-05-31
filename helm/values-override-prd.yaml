@@ -56,3 +56,7 @@ datahub-frontend:
       value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL
       value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png
+
+global:
+  elasticsearch:
+    host: elasticsearch-master-headless

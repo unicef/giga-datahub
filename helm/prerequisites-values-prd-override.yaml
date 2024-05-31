@@ -3,6 +3,7 @@ elasticsearch:
   replicas: 3
   minimumMasterNodes: 1
   antiAffinity: null
+  clusterHealthCheckParams: null
 
   # # Shrink default JVM heap.
   esJavaOpts: "-Xmx1500M -Xms1500M"
