@@ -543,7 +543,23 @@ global:
                   - filter:
                       terms:
                         platform.keyword:
-                          - urn:li:dataPlatform:deltaLake
+                          - urn:li:dataPlatform:trino
+                    weight: 3.0
+                  - filter:
+                      bool:
+                        should:
+                          - terms:
+                              name.keyword:
+                                - master
+                                - school_master
+                          - terms:
+                              browsePathV2.keyword:
+                                - master
+                                - school_master
+                          - terms:
+                              urn.keyword:
+                                - master
+                                - school_master
                     weight: 3.0
                   - filter:
                       terms:
@@ -595,7 +611,23 @@ global:
                   - filter:
                       terms:
                         platform.keyword:
-                          - urn:li:dataPlatform:deltaLake
+                          - urn:li:dataPlatform:trino
+                    weight: 3.0
+                  - filter:
+                      bool:
+                        should:
+                          - terms:
+                              name.keyword:
+                                - master
+                                - school_master
+                          - terms:
+                              browsePathV2.keyword:
+                                - master
+                                - school_master
+                          - terms:
+                              urn.keyword:
+                                - master
+                                - school_master
                     weight: 3.0
                   - filter:
                       terms:
