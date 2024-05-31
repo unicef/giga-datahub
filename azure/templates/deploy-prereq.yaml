@@ -16,6 +16,13 @@ jobs:
                 namespace: $(kubernetesNamespace)
 
             - task: HelmDeploy@0
+              displayName: Helm uninstall Datahub prerequisites
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: uninstall
+                arguments: prerequisites
+
+            - task: HelmDeploy@0
               displayName: Deploy Datahub Prerequisites
               enabled: true
               continueOnError: true
