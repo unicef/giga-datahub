@@ -1,0 +1,14 @@
+jobs:
+  - deployment: Deploy
+    displayName: Rebuild Elasticsearch indices
+    environment: $(kubernetesEnvironment)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: Kubernetes@1
+              displayName: Create adhoc job to rebuild elasticsearch indices
+              inputs:
+                command: create
+                arguments: job --from=cronjob/datahub-datahub-restore-indices-job-template datahub-restore-indices-adhoc
+                namespace: $(kubernetesNamespace)

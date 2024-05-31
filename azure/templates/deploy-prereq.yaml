@@ -20,12 +20,37 @@ jobs:
               inputs:
                 namespace: $(kubernetesNamespace)
                 command: uninstall
-                arguments: prerequisites
+                arguments: prerequisites --ignore-not-found
 
             - task: HelmDeploy@0
-              displayName: Deploy Datahub Prerequisites
+              displayName: Helm uninstall Datahub
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: uninstall
+                arguments: datahub --ignore-not-found
+
+            - task: Kubernetes@1
+              displayName: Delete Elasticsearch PVCs
+              inputs:
+                command: delete
+                namespace: $(kubernetesNamespace)
+                arguments: >
+                  pvc 
+                  elasticsearch-master-elasticsearch-master-0
+                  elasticsearch-master-elasticsearch-master-1
+                  elasticsearch-master-elasticsearch-master-2
+                  --ignore-not-found
+
+            - task: Kubernetes@1
+              displayName: Delete existing restore indices job
+              inputs:
+                command: delete
+                namespace: $(kubernetesNamespace)
+                arguments: job datahub-restore-indices-adhoc --ignore-not-found
+
+            - task: HelmDeploy@0
+              displayName: Deploy Datahub dev Prerequisites
               enabled: true
-              continueOnError: true
               condition: eq(variables.environment, 'dev')
               inputs:
                 command: upgrade
@@ -38,9 +63,8 @@ jobs:
                 arguments: --values helm/prerequisites-values-dev-override.yaml
 
             - task: HelmDeploy@0
-              displayName: Deploy production-config Datahub Prerequisites
+              displayName: Deploy Datahub stg/prd Prerequisites
               enabled: true
-              continueOnError: true
               condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
               inputs:
                 command: upgrade
