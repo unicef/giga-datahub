@@ -498,7 +498,7 @@ global:
       ## Configuration for graph service dao
       graph:
         ## graph dao timeout seconds
-        timeoutSeconds: 50
+        timeoutSeconds: 90
         ## graph dao batch size
         batchSize: 1000
         ## graph dao max result size
