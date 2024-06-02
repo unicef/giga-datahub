@@ -15,12 +15,12 @@ jobs:
                 arguments: add datahub https://helm.datahubproject.io/
                 namespace: $(kubernetesNamespace)
 
-            #            - task: Kubernetes@1
-            #              displayName: Delete existing jobs
-            #              inputs:
-            #                command: delete
-            #                namespace: $(kubernetesNamespace)
-            #                arguments: job --all
+            - task: Kubernetes@1
+              displayName: Delete existing jobs
+              inputs:
+                command: delete
+                namespace: $(kubernetesNamespace)
+                arguments: job --all
 
             - task: HelmDeploy@0
               displayName: Deploy Datahub dev Prerequisites
