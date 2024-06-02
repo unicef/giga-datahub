@@ -1,29 +1,29 @@
 stages:
-  #  - stage: CreateConfig
-  #    displayName: Create/update K8s configuration resources
-  #    jobs:
-  #      - template: create-config.yaml
-  #
-  #  - stage: CreateIngress
-  #    displayName: Create/update GMS ingress resource
-  #    dependsOn: [ ]
-  #    jobs:
-  #      - template: create-ingress.yaml
-  #
-  #  - stage: DeployPrerequisites
-  #    displayName: Deploy Datahub Prerequisites
-  #    dependsOn:
-  #      - CreateConfig
-  #      - CreateIngress
-  #    jobs:
-  #      - template: deploy-prereq.yaml
-  #
-  #  - stage: DeployDatahub
-  #    displayName: Deploy Datahub
-  #    jobs:
-  #      - template: deploy-datahub.yaml
-
-  - stage: RebuildIndices
-    displayName: Rebuild Elasticsearch indices
+  - stage: CreateConfig
+    displayName: Create/update K8s configuration resources
     jobs:
-      - template: rebuild-index.yaml
+      - template: create-config.yaml
+
+  - stage: CreateIngress
+    displayName: Create/update GMS ingress resource
+    dependsOn: [ ]
+    jobs:
+      - template: create-ingress.yaml
+
+  - stage: DeployPrerequisites
+    displayName: Deploy Datahub Prerequisites
+    dependsOn:
+      - CreateConfig
+      - CreateIngress
+    jobs:
+      - template: deploy-prereq.yaml
+
+  - stage: DeployDatahub
+    displayName: Deploy Datahub
+    jobs:
+      - template: deploy-datahub.yaml
+
+#  - stage: RebuildIndices
+#    displayName: Rebuild Elasticsearch indices
+#    jobs:
+#      - template: rebuild-index.yaml

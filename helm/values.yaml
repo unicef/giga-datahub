@@ -16,7 +16,7 @@ datahub-gms:
       memory: 2Gi
     requests:
       cpu: 750m
-      memory: 1536Mi
+      memory: 2Gi
   livenessProbe:
     initialDelaySeconds: 60
     periodSeconds: 30
@@ -63,7 +63,7 @@ datahub-frontend:
       kubernetes.io/ingress.class: azure/application-gateway
       appgw.ingress.kubernetes.io/appgw-ssl-certificate: "kv-cert-unitst"
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
-      appgw.ingress.kubernetes.io/request-timeout: "180"
+      appgw.ingress.kubernetes.io/request-timeout: "120"
     hosts:
       - host: ""
         paths: [ "/" ]

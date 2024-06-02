@@ -6,23 +6,23 @@ jobs:
       runOnce:
         deploy:
           steps:
-            #            - task: Kubernetes@1
-            #              displayName: Create adhoc job to rebuild elasticsearch indices
-            #              inputs:
-            #                command: create
-            #                arguments: job --from=cronjob/datahub-datahub-restore-indices-job-template datahub-restore-indices-adhoc
-            #                namespace: $(kubernetesNamespace)
-
-            #            - task: Kubernetes@1
-            #              displayName: Wait for rebuild indices job to complete
-            #              inputs:
-            #                command: wait
-            #                arguments: --for=condition=complete job/datahub-restore-indices-adhoc --timeout 1h
-            #                namespace: $(kubernetesNamespace)
+            - task: Kubernetes@1
+              displayName: Create adhoc job to rebuild elasticsearch indices
+              inputs:
+                command: create
+                arguments: job --from=cronjob/datahub-datahub-restore-indices-job-template datahub-restore-indices-adhoc
+                namespace: $(kubernetesNamespace)
 
             - task: Kubernetes@1
-              displayName: Inspect rebuild indices job logs
+              displayName: Wait for rebuild indices job to complete
               inputs:
-                command: logs
-                arguments: --follow job/datahub-restore-indices-adhoc
+                command: wait
+                arguments: --for=condition=complete job/datahub-restore-indices-adhoc --timeout 1h
                 namespace: $(kubernetesNamespace)
+
+#            - task: Kubernetes@1
+#              displayName: Wait / Inspect rebuild indices job logs
+#              inputs:
+#                command: logs
+#                arguments: --follow job/datahub-restore-indices-adhoc
+#                namespace: $(kubernetesNamespace)
