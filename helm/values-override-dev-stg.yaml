@@ -13,6 +13,8 @@ datahub-frontend:
         secretKeyRef:
           name: oi-datahub-secrets
           key: AZURE_CLIENT_ID
+    - name: AUTH_VERBOSE_LOGGING
+      value: "true"
     - name: REACT_APP_LOGO_URL
       value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL

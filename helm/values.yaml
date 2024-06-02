@@ -16,7 +16,7 @@ datahub-gms:
       cpu: 2000m
       memory: 2Gi
     requests:
-      cpu: 750m
+      cpu: 1000m
       memory: 1536Mi
   livenessProbe:
     initialDelaySeconds: 60
