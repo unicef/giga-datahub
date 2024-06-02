@@ -1,3 +1,6 @@
+datahub-gms:
+  replicaCount: 2
+
 global:
   elasticsearch:
     host: elasticsearch-master-headless

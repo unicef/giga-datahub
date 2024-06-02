@@ -16,7 +16,7 @@ datahub-gms:
       memory: 2Gi
     requests:
       cpu: 750m
-      memory: 2Gi
+      memory: 1536Mi
   livenessProbe:
     initialDelaySeconds: 60
     periodSeconds: 30
@@ -40,6 +40,8 @@ datahub-gms:
       value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL
       value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png
+    - name: ASYNC_INGEST_DEFAULT
+      value: "true"
 
 datahub-frontend:
   enabled: true
@@ -715,7 +717,7 @@ global:
 
     managed_ingestion:
       enabled: true
-      defaultCliVersion: "0.13.2"
+      defaultCliVersion: "0.13.2.4"
 
     metadata_service_authentication:
       enabled: true
