@@ -23,7 +23,7 @@ stages:
     jobs:
       - template: deploy-datahub.yaml
 
-#  - stage: RebuildIndices
-#    displayName: Rebuild Elasticsearch indices
-#    jobs:
-#      - template: rebuild-index.yaml
+  - stage: RebuildIndices
+    displayName: Rebuild Elasticsearch indices
+    jobs:
+      - template: rebuild-index.yaml

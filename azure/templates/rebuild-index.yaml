@@ -13,16 +13,16 @@ jobs:
                 arguments: job --from=cronjob/datahub-datahub-restore-indices-job-template datahub-restore-indices-adhoc
                 namespace: $(kubernetesNamespace)
 
-            - task: Kubernetes@1
-              displayName: Wait for rebuild indices job to complete
-              inputs:
-                command: wait
-                arguments: --for=condition=complete job/datahub-restore-indices-adhoc --timeout 1h
-                namespace: $(kubernetesNamespace)
+            #            - task: Kubernetes@1
+            #              displayName: Wait for rebuild indices job to complete
+            #              inputs:
+            #                command: wait
+            #                arguments: --for=condition=complete job/datahub-restore-indices-adhoc --timeout 1h
+            #                namespace: $(kubernetesNamespace)
 
-#            - task: Kubernetes@1
-#              displayName: Wait / Inspect rebuild indices job logs
-#              inputs:
-#                command: logs
-#                arguments: --follow job/datahub-restore-indices-adhoc
-#                namespace: $(kubernetesNamespace)
+            - task: Kubernetes@1
+              displayName: Wait / Inspect rebuild indices job logs
+              inputs:
+                command: logs
+                arguments: --follow job/datahub-restore-indices-adhoc
+                namespace: $(kubernetesNamespace)
