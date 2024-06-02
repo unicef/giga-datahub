@@ -114,3 +114,13 @@ jobs:
                     AUTH_OIDC_DISCOVERY_URI: "https://$(azureTenantName).b2clogin.com/$(azureTenantName).onmicrosoft.com/$(azurePolicyName)/v2.0/.well-known/openid-configuration"
                     AUTH_OIDC_BASE_URL: "https://$(ingressHost)"
                     AUTH_OIDC_SCOPE: "openid profile offline_access"
+
+            - task: Kubernetes@1
+              displayName: Create PDB/HPA rules
+              condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
+              inputs:
+                namespace: $(kubernetesNamespace)
+                configurationType: configuration
+                command: apply
+                useConfigurationFile: true
+                configuration: k8s/datahub-stg-prd.yaml
