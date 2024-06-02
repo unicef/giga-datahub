@@ -15,38 +15,12 @@ jobs:
                 arguments: add datahub https://helm.datahubproject.io/
                 namespace: $(kubernetesNamespace)
 
-            - task: HelmDeploy@0
-              displayName: Helm uninstall Datahub prerequisites
-              inputs:
-                namespace: $(kubernetesNamespace)
-                command: uninstall
-                arguments: prerequisites --ignore-not-found
-
-            - task: HelmDeploy@0
-              displayName: Helm uninstall Datahub
-              inputs:
-                namespace: $(kubernetesNamespace)
-                command: uninstall
-                arguments: datahub --ignore-not-found
-
             - task: Kubernetes@1
-              displayName: Delete Elasticsearch PVCs
+              displayName: Delete existing jobs
               inputs:
                 command: delete
                 namespace: $(kubernetesNamespace)
-                arguments: >
-                  pvc 
-                  elasticsearch-master-elasticsearch-master-0
-                  elasticsearch-master-elasticsearch-master-1
-                  elasticsearch-master-elasticsearch-master-2
-                  --ignore-not-found
-
-            - task: Kubernetes@1
-              displayName: Delete existing restore indices job
-              inputs:
-                command: delete
-                namespace: $(kubernetesNamespace)
-                arguments: job datahub-restore-indices-adhoc --ignore-not-found
+                arguments: job --all
 
             - task: HelmDeploy@0
               displayName: Deploy Datahub dev Prerequisites

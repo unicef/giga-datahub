@@ -75,8 +75,8 @@ jobs:
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
             - task: Kubernetes@1
-              displayName: Force restart Datahub frontend
+              displayName: Force restart deployments
               inputs:
                 namespace: $(kubernetesNamespace)
                 command: rollout
-                arguments: restart deploy datahub-datahub-frontend
+                arguments: restart deploy datahub-datahub-frontend datahub-datahub-gms

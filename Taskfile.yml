@@ -80,6 +80,7 @@ tasks:
     cmds:
       - kubectl apply -f namespace.yaml
       - kubectl apply -f secrets.yaml --namespace giga-datahub
+      - kubectl apply -f datahub-stg-prd.yaml --namespace giga-datahub
 
   helm-up-prereqs:
     desc: Install/upgrade Datahub prerequisites
@@ -130,4 +131,5 @@ tasks:
     cmds:
       - kubectl delete all --all --namespace giga-datahub
       - kubectl delete pvc --all --namespace giga-datahub
+      - kubectl delete -f datahub-stg-prd.yaml
       - kubectl delete -f namespace.yaml

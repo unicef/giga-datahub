@@ -1,0 +1,75 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: datahub-frontend-pdb
+  labels:
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/part-of: giga-dataops-platform
+    app.kubernetes.io/component: datahub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: datahub
+      app.kubernetes.io/name: datahub-frontend
+  minAvailable: 2
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: datahub-frontend-hpa
+  labels:
+    app.kubernetes.io/name: datahub-frontend
+    app.kubernetes.io/part-of: giga-dataops-platform
+    app.kubernetes.io/component: datahub
+spec:
+  minReplicas: 2
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: datahub-datahub-frontend
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: datahub-gms-pdb
+  labels:
+    app.kubernetes.io/name: datahub-gms
+    app.kubernetes.io/part-of: giga-dataops-platform
+    app.kubernetes.io/component: datahub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: datahub
+      app.kubernetes.io/name: datahub-gms
+  minAvailable: 2
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: datahub-gms-hpa
+  labels:
+    app.kubernetes.io/name: datahub-gms
+    app.kubernetes.io/part-of: giga-dataops-platform
+    app.kubernetes.io/component: datahub
+spec:
+  minReplicas: 2
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: datahub-datahub-gms
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
