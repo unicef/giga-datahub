@@ -15,6 +15,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: datahub-datahub-gms
+                name: elasticsearch-master
                 port:
-                  number: 8080
+                  number: 9200
