@@ -10,7 +10,7 @@ jobs:
 
             - task: Kubernetes@1
               displayName: Set up Datahub GMS ingress
-              condition: eq(variables.DEPLOY_ENV, 'dev')
+              condition: eq(variables.environment, 'dev')
               inputs:
                 namespace: $(kubernetesNamespace)
                 command: apply
