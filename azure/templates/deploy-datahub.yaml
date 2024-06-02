@@ -37,6 +37,7 @@ jobs:
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub stg
+              # Uses Entra ID
               condition: eq(variables.environment, 'stg')
               inputs:
                 command: upgrade

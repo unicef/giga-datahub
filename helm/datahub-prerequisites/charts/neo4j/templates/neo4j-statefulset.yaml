@@ -203,4 +203,3 @@ spec:
   {{- if $volumeClaimTemplates }}
   volumeClaimTemplates: {{ $volumeClaimTemplates | nindent 4 }}
   {{- end }}
-
