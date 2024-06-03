@@ -522,39 +522,6 @@ global:
           # functionScores - See the following for function score syntax
           # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/query-dsl-function-score-query.html
 
-          x-search-boost-delta-lake: &searchBoostDeltaLake
-            filter:
-              terms:
-                platform.keyword:
-                  - urn:li:dataPlatform:deltaLake
-            weight: 3.0
-
-          x-search-boost-master: &searchBoostMaster
-            filter:
-              bool:
-                should:
-                  - terms:
-                      name.keyword:
-                        - master
-                        - school_master
-                  - terms:
-                      browsePathV2.keyword:
-                        - master
-                        - school_master
-                  - terms:
-                      urn.keyword:
-                        - master
-                        - school_master
-            weight: 3.0
-
-          x-search-bury-user-groups: &searchBuryUserGroups
-            filter:
-              terms:
-                type.keyword:
-                  - urn:li:corpUser
-                  - urn:li:corpGroup
-            weight: 0.1
-
           x-search-common: &searchCommon
             - filter:
                 term:
@@ -566,9 +533,26 @@ global:
                   deprecated:
                     value: false
               weight: 0.01
-            - <<: *searchBoostDeltaLake
-            - <<: *searchBoostMaster
-            - <<: *searchBuryUserGroups
+            - filter:
+                terms:
+                  platform.keyword:
+                    - urn:li:dataPlatform:deltaLake
+              weight: 5.0
+            - bool:
+                should:
+                  - match:
+                      name.keyword: master
+                  - match:
+                      browsePathV2.keyword: master
+                  - match:
+                      urn.keyword: master
+              weight: 3.0
+            - filter:
+                terms:
+                  urn.keyword:
+                    - urn:li:corpuser
+                    - urn:li:corpgroup
+              weight: 0.1
 
           x-search-hide-deprecated: &searchHideDeprecated
             must_not:
@@ -582,8 +566,9 @@ global:
             #              simpleQuery: false
             #              prefixMatchQuery: false
             #              exactMatchQuery: false
-            #              boolQuery: *searchHideDeprecated
+            #              #              boolQuery: *searchHideDeprecated
             #              functionScore:
+            #                query: *searchBoostMaster
             #                functions: *searchCommon
             #                score_mode: multiply
             #                boost_mode: multiply
@@ -783,8 +768,8 @@ global:
     cache:
       search:
         ## Enable general search caching
-        enabled: false
-        ## Configuration for the primary cahe
+        enabled: true
+        ## Configuration for the primary cache
         primary:
           ttlSeconds: 600
           maxSize: 10000
