@@ -1,3 +1,5 @@
+x-do-setup-jobs: &doSetupJobs true
+
 # Values to start up datahub after starting up the datahub-prerequisites chart with "prerequisites" release name
 # Copy this chart and change configuration as needed.
 datahub-gms:
@@ -150,7 +152,7 @@ datahub-ingestion-cron:
     # tag: "v0.11.0" # defaults to .global.datahub.version
 
 elasticsearchSetupJob:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-elasticsearch-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -184,7 +186,7 @@ elasticsearchSetupJob:
   #   imagePullPolicy: Always
 
 kafkaSetupJob:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-kafka-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -257,7 +259,7 @@ mysqlSetupJob:
   #   imagePullPolicy: Always
 
 postgresqlSetupJob:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-postgres-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -301,7 +303,7 @@ postgresqlSetupJob:
 
 ## No code data migration
 datahubUpgrade:
-  enabled: true
+  enabled: *doSetupJobs
   image:
     repository: acryldata/datahub-upgrade
     # tag: "v0.11.0"  # defaults to .global.datahub.version
@@ -508,7 +510,7 @@ global:
         maxResult: 10000
 
       custom:
-        enabled: false
+        enabled: true
         # See documentation: https://datahubproject.io/docs/how/search/#customizing-search
         config:
           # Notes:
@@ -520,65 +522,93 @@ global:
           # functionScores - See the following for function score syntax
           # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/query-dsl-function-score-query.html
 
-          queryConfigurations:
-            # Select *
-            - queryRegex: '[*]|'
-              simpleQuery: false
-              prefixMatchQuery: false
-              exactMatchQuery: false
-              boolQuery:
-                must_not:
-                  term:
-                    deprecated:
-                      value: true
-              functionScore:
-                functions:
-                  - filter:
-                      term:
-                        materialized:
-                          value: true
-                    weight: 0.8
-                score_mode: multiply
-                boost_mode: multiply
+          x-search-boost-delta-lake: &searchBoostDeltaLake
+            filter:
+              terms:
+                platform.keyword:
+                  - urn:li:dataPlatform:deltaLake
+            weight: 3.0
 
-            # Criteria for exact-match only
-            # Contains quoted or contains underscore then use exact match query
-            - queryRegex: >-
-                ["'].+["']|\S+_\S+
-              simpleQuery: false
-              prefixMatchQuery: true
-              exactMatchQuery: true
-              functionScore:
-                functions:
-                  - filter:
-                      term:
-                        materialized:
-                          value: true
-                    weight: 0.8
-                  - filter:
-                      term:
-                        deprecated:
-                          value: true
-                    weight: 0
-                score_mode: multiply
-                boost_mode: multiply
+          x-search-boost-master: &searchBoostMaster
+            filter:
+              bool:
+                should:
+                  - terms:
+                      name.keyword:
+                        - master
+                        - school_master
+                  - terms:
+                      browsePathV2.keyword:
+                        - master
+                        - school_master
+                  - terms:
+                      urn.keyword:
+                        - master
+                        - school_master
+            weight: 3.0
+
+          x-search-bury-user-groups: &searchBuryUserGroups
+            filter:
+              terms:
+                type.keyword:
+                  - urn:li:corpUser
+                  - urn:li:corpGroup
+            weight: 0.1
+
+          x-search-common: &searchCommon
+            - filter:
+                term:
+                  materialized:
+                    value: true
+              weight: 0.8
+            - filter:
+                term:
+                  deprecated:
+                    value: false
+              weight: 0.01
+            - <<: *searchBoostDeltaLake
+            - <<: *searchBoostMaster
+            - <<: *searchBuryUserGroups
+
+          x-search-hide-deprecated: &searchHideDeprecated
+            must_not:
+              term:
+                deprecated:
+                  value: true
+
+          queryConfigurations:
+            #            # Select *
+            #            - queryRegex: '[*]|'
+            #              simpleQuery: false
+            #              prefixMatchQuery: false
+            #              exactMatchQuery: false
+            #              boolQuery: *searchHideDeprecated
+            #              functionScore:
+            #                functions: *searchCommon
+            #                score_mode: multiply
+            #                boost_mode: multiply
+            #
+            #            # Criteria for exact-match only
+            #            # Contains quoted or contains underscore then use exact match query
+            #            - queryRegex: >-
+            #                ["'].+["']|\S+_\S+
+            #              simpleQuery: false
+            #              prefixMatchQuery: true
+            #              exactMatchQuery: true
+            #              boolQuery: *searchHideDeprecated
+            #              functionScore:
+            #                functions: *searchCommon
+            #                score_mode: multiply
+            #                boost_mode: multiply
+
             # default
             - queryRegex: .*
               simpleQuery: true
               prefixMatchQuery: true
               exactMatchQuery: true
-              boolQuery:
-                must_not:
-                  term:
-                    deprecated:
-                      value: true
+              #              boolQuery: *searchHideDeprecated
               functionScore:
-                functions:
-                  - filter:
-                      term:
-                        materialized:
-                          value: true
-                    weight: 0.8
+                functions: *searchCommon
                 score_mode: multiply
                 boost_mode: multiply
 
@@ -702,7 +732,7 @@ global:
     systemUpdate:
       ## The following options control settings for datahub-upgrade job which will
       ## managed ES indices and other update related work
-      enabled: true
+      enabled: *doSetupJobs
 
     encryptionKey:
       secretRef: "datahub-encryption-secrets"
@@ -749,6 +779,25 @@ global:
 
     ## Enables diff mode for graph writes, uses a different code path that produces a diff from previous to next to write relationships instead of wholesale deleting edges and reading
     enableGraphDiffMode: true
+
+    cache:
+      search:
+        ## Enable general search caching
+        enabled: false
+        ## Configuration for the primary cahe
+        primary:
+          ttlSeconds: 600
+          maxSize: 10000
+        ## Configuration for homepage cache
+        homepage:
+          entityCounts:
+            ttlSeconds: 600
+        ## Lineage specific caching options
+        lineage:
+          ## Enables in-memory cache for searchAcrossLineage query
+          enabled: false
+          ttlSeconds: 86400
+          lightningThreshold: 300
 
     ## Values specific to the unified search and browse feature.
     search_and_browse:
