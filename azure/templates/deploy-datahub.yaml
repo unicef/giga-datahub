@@ -74,9 +74,9 @@ jobs:
                   --values helm/values-override-stg-prd.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
 
-#            - task: Kubernetes@1
-#              displayName: Force restart deployments
-#              inputs:
-#                namespace: $(kubernetesNamespace)
-#                command: rollout
-#                arguments: restart deploy datahub-datahub-frontend datahub-datahub-gms
+            - task: Kubernetes@1
+              displayName: Force restart deployments
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: rollout
+                arguments: restart deploy datahub-datahub-frontend datahub-datahub-gms
