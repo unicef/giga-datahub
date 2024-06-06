@@ -55,7 +55,6 @@ tasks:
     desc: Remove containers
     cmds:
       - docker compose --project-name {{.PROJECT_NAME}} down --volumes --remove-orphans {{.CLI_ARGS}}
-      - docker compose --project-name giga-dataops-platform --file docker-compose-network.yaml down --volumes --remove-orphans {{.CLI_ARGS}}
 
   helm-up:
     desc: Install/upgrade Datahub Helm chart on a local cluster
@@ -105,7 +104,7 @@ tasks:
         helm upgrade --install datahub datahub/datahub
         --version 0.4.0
         --values values.yaml
-        --values values-override-dev-stg.yaml
+        --values values-override-prd.yaml
         --namespace giga-datahub
         --create-namespace
         --timeout 1h
@@ -114,6 +113,7 @@ tasks:
         --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
         --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
         --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name=giga-datahub-secrets
+        --set datahub-frontend.extraEnvs[1].valueFrom.secretKeyRef.name=giga-datahub-secrets
 
   helm-down:
     desc: Uninstall Helm charts

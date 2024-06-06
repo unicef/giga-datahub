@@ -1,4 +1,4 @@
-x-do-setup-jobs: &doSetupJobs true
+x-do-setup-jobs: &doSetupJobs false
 
 # Values to start up datahub after starting up the datahub-prerequisites chart with "prerequisites" release name
 # Copy this chart and change configuration as needed.
