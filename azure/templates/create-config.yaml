@@ -13,7 +13,7 @@ jobs:
               inputs:
                 namespace: $(kubernetesNamespace)
                 command: get
-                arguments: secret oi-datahub-secrets-$(deployEnv) -o yaml --ignore-not-found
+                arguments: secret oi-datahub-secrets-$(deployEnv) -o yaml
 
             - task: Kubernetes@1
               displayName: Create secret for PostgreSQL password
