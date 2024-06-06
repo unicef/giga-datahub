@@ -36,22 +36,20 @@ datahub-frontend:
         secretKeyRef:
           name: giga-datahub-secrets
           key: AUTH_OIDC_SCOPE
-    - name: AUTH_OIDC_CLIENT_AUTHENTICATION_METHOD
-      value: "none"
+    #    - name: AUTH_OIDC_CLIENT_AUTHENTICATION_METHOD
+    #      value: "none"
     - name: AUTH_OIDC_PREFERRED_JWS_ALGORITHM
       value: RS256
-    - name: AUTH_OIDC_USE_NONCE
-      value: "true"
-    - name: AUTH_OIDC_RESPONSE_TYPE
-      value: "code id_token"
-    - name: AUTH_OIDC_RESPONSE_MODE
-      value: form_post
+    #    - name: AUTH_OIDC_USE_NONCE
+    #      value: "true"
+    #    - name: AUTH_OIDC_RESPONSE_TYPE
+    #      value: "code id_token"
+    #    - name: AUTH_OIDC_RESPONSE_MODE
+    #      value: form_post
     - name: AUTH_OIDC_USER_NAME_CLAIM
       value: email
     - name: AUTH_OIDC_GROUPS_CLAIM
       value: groups
-    - name: AUTH_OIDC_PREFERRED_JWS_ALGORITHM
-      value: RS256
     - name: REACT_APP_LOGO_URL
       value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL
