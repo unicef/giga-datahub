@@ -73,13 +73,6 @@ jobs:
                     user.props: "$(datahubUserProps)"
 
             - task: Kubernetes@1
-              displayName: Delete old Datahub secret
-              inputs:
-                command: delete
-                arguments: secret giga-datahub-secrets --ignore-not-found
-                namespace: $(kubernetesNamespace)
-
-            - task: Kubernetes@1
               displayName: Create Datahub dev/stg secrets
               condition: or(eq(variables.environment, 'dev'), eq(variables.environment, 'stg'))
               inputs:
