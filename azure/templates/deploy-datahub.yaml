@@ -16,6 +16,13 @@ jobs:
                 namespace: $(kubernetesNamespace)
 
             - task: HelmDeploy@0
+              displayName: Helm uninstall Datahub
+              inputs:
+                namespace: $(kubernetesNamespace)
+                command: uninstall
+                arguments: datahub
+
+            - task: HelmDeploy@0
               displayName: Helm deploy Datahub dev
               # Uses Entra ID
               condition: eq(variables.environment, 'dev')
