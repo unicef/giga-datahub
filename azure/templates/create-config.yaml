@@ -113,7 +113,7 @@ jobs:
                   stringData:
                     AUTH_OIDC_DISCOVERY_URI: "https://$(azureTenantName).b2clogin.com/$(azureTenantName).onmicrosoft.com/$(azurePolicyName)/v2.0/.well-known/openid-configuration"
                     AUTH_OIDC_BASE_URL: "https://$(ingressHost)"
-                    AUTH_OIDC_SCOPE: "openid profile offline_access"
+                    AUTH_OIDC_SCOPE: "openid profile offline_access User.Read"
 
             - task: Kubernetes@1
               displayName: Create configmap
