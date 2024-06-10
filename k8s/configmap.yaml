@@ -24,7 +24,7 @@ data:
             - filter:
                 terms:
                   platform.keyword:
-                    - urn:li:dataPlatform:trino
+                    - urn:li:dataPlatform:deltaLake
               weight: 3.0
             - filter:
                 bool:
