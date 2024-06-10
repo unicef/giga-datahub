@@ -54,7 +54,7 @@ jobs:
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="giga-datahub-secrets"
                   --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
-                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="giga-datahub-secrets"
+                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub prd
