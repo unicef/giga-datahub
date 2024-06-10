@@ -52,7 +52,7 @@ jobs:
                   --values helm/values-override-dev-stg.yaml
                   --values helm/values-override-stg-prd.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="giga-datahub-secrets"
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
                   --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
                   --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
 
