@@ -15,10 +15,10 @@ datahub-gms:
     co.elastic.logs/enabled: "true"
   resources:
     limits:
-      cpu: 2000m
+      cpu: 1500m
       memory: 2Gi
     requests:
-      cpu: 1000m
+      cpu: 100m
       memory: 1536Mi
   livenessProbe:
     initialDelaySeconds: 60
@@ -364,7 +364,7 @@ datahubUpgrade:
         cpu: 1500m
         memory: 768Mi
       requests:
-        cpu: 1000m
+        cpu: 100m
         memory: 512Mi
     # Add the concurrency Policy flexibility via values
     concurrencyPolicy: Allow
