@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: giga-datahub-configmap
+data:
+  custom_search_config.yml: |
+    queryConfigurations:
+      - queryRegex: .*
+        simpleQuery: true
+        prefixMatchQuery: true
+        exactMatchQuery: true
+        functionScore:
+          functions:
+            - filter:
+                term:
+                  materialized:
+                    value: true
+              weight: 0.8
+            - filter:
+                term:
+                  deprecated:
+                    value: true
+              weight: 0.01
+            - filter:
+                terms:
+                  platform.keyword:
+                    - urn:li:dataPlatform:trino
+              weight: 3.0
+            - filter:
+                bool:
+                  should:
+                    - match:
+                        id.keyword: master
+                    - match:
+                        name.keyword: master
+                    - match:
+                        browsePath.keyword: master
+                    - match:
+                        browsePathV2.keyword: master
+                    - match:
+                        urn.keyword: master
+              weight: 5.0
+            - filter:
+                terms:
+                  urn.keyword:
+                    - urn:li:corpuser
+                    - urn:li:corpgroup
+              weight: 0.1
+          score_mode: multiply
+          boost_mode: multiply
