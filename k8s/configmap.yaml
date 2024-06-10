@@ -41,10 +41,12 @@ data:
                         urn.keyword: master
               weight: 5.0
             - filter:
-                terms:
-                  urn.keyword:
-                    - urn:li:corpuser
-                    - urn:li:corpgroup
+                bool:
+                  should:
+                    - match:
+                        urn.keyword: urn:li:corpuser
+                    - match:
+                        urn.keyword: urn:li:corpgroup
               weight: 0.1
           score_mode: multiply
           boost_mode: multiply
