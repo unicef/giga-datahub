@@ -13,11 +13,6 @@ data:
           functions:
             - filter:
                 term:
-                  materialized:
-                    value: true
-              weight: 0.8
-            - filter:
-                term:
                   deprecated:
                     value: true
               weight: 0.01
@@ -25,21 +20,19 @@ data:
                 terms:
                   platform.keyword:
                     - urn:li:dataPlatform:deltaLake
-              weight: 3.0
+              weight: 5.0
             - filter:
                 bool:
                   should:
                     - match:
-                        id.keyword: master
-                    - match:
-                        name.keyword: master
-                    - match:
-                        browsePath.keyword: master
-                    - match:
-                        browsePathV2.keyword: master
-                    - match:
-                        urn.keyword: master
-              weight: 5.0
+                        id.keyword: school_master.db
+              weight: 10.0
+            - filter:
+                bool:
+                  should:
+                    - regexp:
+                        id.keyword: '.*dq[-_]results.*'
+              weight: 0.1
             - filter:
                 bool:
                   should:
@@ -47,6 +40,6 @@ data:
                         urn.keyword: urn:li:corpuser
                     - match:
                         urn.keyword: urn:li:corpgroup
-              weight: 0.1
+              weight: 0.05
           score_mode: multiply
           boost_mode: multiply

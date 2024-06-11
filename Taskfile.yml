@@ -115,6 +115,9 @@ tasks:
         --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
         --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
         --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name=giga-datahub-secrets
+        --set datahub-gms.ingress.enabled=true
+        --set datahub-gms.ingress.hosts[0].host={{.DATAHUB_GMS_INGRESS_HOST}}
+        --set datahub-gms.ingress.hosts[0].paths[0]=/
 
   helm-down:
     desc: Uninstall Helm charts
