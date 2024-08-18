@@ -6,7 +6,7 @@ datahub-frontend:
       secretRef: ""
       secretKey: AZURE_CLIENT_SECRET
     azureTenantId: ""
-    scope: "User.Read openid profile email"
+    scope: "openid profile email"
   extraEnvs:
     - name: AUTH_OIDC_CLIENT_ID
       valueFrom:
