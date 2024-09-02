@@ -17,7 +17,6 @@ jobs:
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub dev
-              # Uses Entra ID
               condition: eq(variables.environment, 'dev')
               inputs:
                 command: upgrade
@@ -37,7 +36,6 @@ jobs:
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub stg
-              # Uses Entra ID
               condition: eq(variables.environment, 'stg')
               inputs:
                 command: upgrade
@@ -58,7 +56,6 @@ jobs:
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub prd
-              # Uses B2C
               condition: eq(variables.environment, 'prd')
               inputs:
                 command: upgrade
@@ -73,6 +70,9 @@ jobs:
                   --values helm/values-override-prd.yaml
                   --values helm/values-override-stg-prd.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
+                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
 
             - task: Kubernetes@1
               displayName: Force restart deployments

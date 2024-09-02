@@ -73,8 +73,7 @@ jobs:
                     user.props: "$(datahubUserProps)"
 
             - task: Kubernetes@1
-              displayName: Create Datahub dev/stg secrets
-              condition: or(eq(variables.environment, 'dev'), eq(variables.environment, 'stg'))
+              displayName: Create Datahub secrets
               inputs:
                 namespace: $(kubernetesNamespace)
                 configurationType: inline
@@ -90,28 +89,6 @@ jobs:
                       app.kubernetes.io/part-of: giga-dataops-platform
                       app.kubernetes.io/component: datahub
                   stringData:
-                    AUTH_OIDC_BASE_URL: "https://$(ingressHost)"
-                    AUTH_OIDC_SCOPE: "openid profile offline_access"
-
-            - task: Kubernetes@1
-              displayName: Create Datahub prd secrets
-              condition: eq(variables.environment, 'prd')
-              inputs:
-                namespace: $(kubernetesNamespace)
-                configurationType: inline
-                command: apply
-                useConfigurationFile: true
-                inline: |
-                  apiVersion: v1
-                  kind: Secret
-                  metadata:
-                    name: giga-datahub-secrets
-                    labels:
-                      app.kubernetes.io/name: giga-datahub
-                      app.kubernetes.io/part-of: giga-dataops-platform
-                      app.kubernetes.io/component: datahub
-                  stringData:
-                    AUTH_OIDC_DISCOVERY_URI: "https://$(azureTenantName).b2clogin.com/$(azureTenantName).onmicrosoft.com/$(azurePolicyName)/v2.0/.well-known/openid-configuration"
                     AUTH_OIDC_BASE_URL: "https://$(ingressHost)"
                     AUTH_OIDC_SCOPE: "openid profile offline_access"
 
