@@ -97,6 +97,7 @@ tasks:
         --set postgresql.primary.readinessProbe.enabled=false
         --set postgresql.primary.livenessProbe.enabled=false
         --set elasticsearch.ingress.hosts[0].host={{.DATAHUB_ES_INGRESS_HOST}}
+        --set elasticsearch.replicas=1
 
   helm-up-datahub:
     desc: Install/upgrade Datahub
@@ -110,8 +111,6 @@ tasks:
         --namespace giga-datahub
         --create-namespace
         --timeout 1h
-        --set datahub-frontend.ingress.hosts[0].host={{.AUTH_OIDC_BASE_URL}}
-        --set datahub-frontend.ingress.annotations=null
         --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef=giga-datahub-secrets
         --set datahub-frontend.oidcAuthentication.azureTenantId={{.AUTH_OIDC_TENANT_ID}}
         --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name=giga-datahub-secrets
