@@ -11,8 +11,6 @@ datahub-gms:
     # to run
     # command: customCommand
     # args: []
-  podAnnotations:
-    co.elastic.logs/enabled: "true"
   resources:
     limits:
       cpu: 1500m
@@ -28,6 +26,10 @@ datahub-gms:
     initialDelaySeconds: 120
     periodSeconds: 30
     failureThreshold: 8
+  theme_v2:
+    enabled: true
+    default: false
+    toggeable: true
   # Optionaly specify service type for datahub-gms: LoadBalancer, ClusterIP or NodePort, by default: LoadBalancer
   service:
     type: ClusterIP
@@ -40,23 +42,9 @@ datahub-gms:
   #       secretKey: gms-password
   extraEnvs:
     - name: REACT_APP_LOGO_URL
-      value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
+      value: https://saunigigashare.blob.core.windows.net/assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL
-      value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png
-    - name: ASYNC_INGEST_DEFAULT
-      value: "true"
-    - name: ELASTICSEARCH_QUERY_CUSTOM_CONFIG_ENABLED
-      value: "true"
-    - name: ELASTICSEARCH_QUERY_CUSTOM_CONFIG_FILE
-      value: "/datahub/datahub-gms/resources/search/custom_search_config.yml"
-  extraVolumes:
-    - name: search-config
-      configMap:
-        name: giga-datahub-configmap
-  extraVolumeMounts:
-    - name: search-config
-      mountPath: /datahub/datahub-gms/resources/search
-      readOnly: true
+      value: https://saunigigashare.blob.core.windows.net/assets/GIGA_logo_blue.png
 
 datahub-frontend:
   enabled: true
@@ -111,7 +99,7 @@ acryl-datahub-actions:
   enabled: true
   image:
     repository: acryldata/datahub-actions
-    tag: "v0.0.11"
+    tag: "v0.2.0"
     # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
     # to run
     # command: customCommand
@@ -164,7 +152,7 @@ datahub-ingestion-cron:
     # tag: "v0.11.0" # defaults to .global.datahub.version
 
 elasticsearchSetupJob:
-  enabled: *doSetupJobs
+  enabled: true
   image:
     repository: acryldata/datahub-elasticsearch-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -179,7 +167,7 @@ elasticsearchSetupJob:
     requests:
       cpu: 300m
       memory: 256Mi
-  extraInitContainers: [ ]
+  extraInitContainers: []
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -190,15 +178,19 @@ elasticsearchSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: { }
+  podAnnotations: {}
+  # If you want to use OpenSearch instead of ElasticSearch add the USE_AWS_ELASTICSEARCH environment variable below
+  # extraEnvs:
+  #   - name: USE_AWS_ELASTICSEARCH
+  #     value: "true"
   # Add extra sidecar containers to job pod
-  extraSidecars: [ ]
-  # - name: my-image-name
-  #   image: my-image
-  #   imagePullPolicy: Always
+  extraSidecars: []
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
 
 kafkaSetupJob:
-  enabled: *doSetupJobs
+  enabled: true
   image:
     repository: acryldata/datahub-kafka-setup
     # tag: "v0.11.0" # defaults to .global.datahub.version
@@ -213,7 +205,7 @@ kafkaSetupJob:
     requests:
       cpu: 300m
       memory: 768Mi
-  extraInitContainers: [ ]
+  extraInitContainers: []
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -224,12 +216,12 @@ kafkaSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: { }
+  podAnnotations: {}
   # Add extra sidecar containers to job pod
-  extraSidecars: [ ]
-  # - name: my-image-name
-  #   image: my-image
-  #   imagePullPolicy: Always
+  extraSidecars: []
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
 
 mysqlSetupJob:
   enabled: false
@@ -339,29 +331,9 @@ datahubUpgrade:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "-2"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: { }
+  podAnnotations: {}
   # Add extra sidecar containers to job pod
-  extraSidecars: [ ]
-  # - name: my-image-name
-  #   image: my-image
-  #   imagePullPolicy: Always
-  cleanupJob:
-    image:
-      # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
-      # to run
-      command:
-      args: [ ]
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 300m
-        memory: 256Mi
-    # Add the concurrency Policy flexibility via values
-    concurrencyPolicy: Allow
-    # Add extra sidecar containers to job pod
-    extraSidecars: [ ]
+  extraSidecars: []
     # - name: my-image-name
     #   image: my-image
     #   imagePullPolicy: Always
@@ -370,26 +342,49 @@ datahubUpgrade:
       # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
       # to run
       command:
-      args: [ ]
+      # Overrides the entire set of upgrade job arguments, for if you want to specify exactly whi
+      args: []
+    # Alternative for overriding specific args instead of changing the entire set and overriding defaults
+    args:
+      # Restore only rows with less than a certain epoch millisecond timestamp
+      lePitEpochMs:
+      # Restore only rows with greater than a certain epoch millisecond timestamp
+      gePitEpochMs:
+      # Used in conjunction with urnBasedPagination, resume from a particular urn
+      lastUrn:
+      # Used in conjunction with urnBasedPagination and lastUrn, resume from a particular urn for a particular aspect to avoid reprocessing certain aspects
+      lastAspect:
+      # Uses a key based paging strategy when scrolling through SQL rows instead of offset. Often faster for large sets of data
+      urnBasedPagination:
+      # Only restore for certain aspects, comma separated list
+      aspectNames:
+      # A SQL "like" statement that matches against the urn column
+      urnLike:
+      # Used with default paging, start from a specified offset
+      startingOffset:
+      # Specifies number of threads for processing pages of rows to restore
+      numThreads:
     resources:
       limits:
-        cpu: 1500m
-        memory: 768Mi
-      requests:
-        cpu: 100m
+        cpu: 500m
         memory: 512Mi
+      requests:
+        cpu: 300m
+        memory: 256Mi
+    # Schedule of CronJob when enabled
+    schedule: "0 0 * * 0"
     # Add the concurrency Policy flexibility via values
     concurrencyPolicy: Allow
     # Add extra sidecar containers to job pod
-    extraSidecars: [ ]
-    # - name: my-image-name
-    #   image: my-image
-    #   imagePullPolicy: Always
+    extraSidecars: []
+      # - name: my-image-name
+      #   image: my-image
+      #   imagePullPolicy: Always
     # Optionally set a specific PostgreSQL database name using extraEnvs
     # extraEnvs:
     #   - name: "DATAHUB_DB_NAME"
     #    value: "dh"
-  extraInitContainers: [ ]
+  extraInitContainers: []
 
 ## Runs system update processes
 ## Includes: Elasticsearch Indices Creation/Reindex (See global.elasticsearch.index for additional configuration)
@@ -401,10 +396,10 @@ datahubSystemUpdate:
     # to run
     # command: customCommand
     # args: []
-  podSecurityContext: { }
-  # fsGroup: 1000
-  securityContext: { }
-  # runAsUser: 1000
+  podSecurityContext: {}
+    # fsGroup: 1000
+  securityContext: {}
+    # runAsUser: 1000
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
@@ -417,38 +412,85 @@ datahubSystemUpdate:
   # steps are completed, the non-blocking job runs while the rest of the
   # system is starting.
   nonblocking:
-    enabled: false
+    enabled: true
     # When mode = 'nonblocking' the nonblocking job should not include the above helm.sh/hook annotations
-    annotations: { }
+    annotations:
+      # This is what defines this resource as a hook. Without this line, the
+      # job is considered part of the release.
+      helm.sh/hook: post-install,post-upgrade
+      helm.sh/hook-delete-policy: before-hook-creation
     image:
       args:
       # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
       # to run
       # command: customCommand
       # args: []
-  podAnnotations: { }
+  # Depends on v0.14.2 or greater
+  bootstrapMCPs:
+    default:
+      value_configs:
+        - "datahub.bootstrapMCPs.default.ingestion.version"
+        - "datahub.bootstrapMCPs.default.schedule.timezone"
+    datahubGC:
+      # For information about this recipe https://datahubproject.io/docs/0.14.0/generated/ingestion/sources/datahubgc/#install-the-plugin
+      # Generate values.schedule.interval with a jitter window using a generated config
+      dailyCronWindow:
+        startHour: 18
+        endHour: 5
+      # dynamic overrides, the output to each function is deepMerged with values
+      values_generated_configs:
+        - "datahub.systemUpdate.datahubGC.dailyCronWindow"
+      # Environment variable containing the json value for the template mcp
+      values_env: DATAHUB_GC_BOOTSTRAP_VALUES
+      revision_env: DATAHUB_GC_BOOTSTRAP_REVISION
+      # Base values for the template mcp
+      values:
+        ingestion:
+          name: datahub-gc
+          # # override global.datahub.managed_ingestion.defaultCliVersion
+          # version: "0.14.1.7rc2"
+        # schedule:
+          # # override global.datahub.timezone
+          # timezone: "UTC"
+          # # override dailyCronWindow
+          # interval: "0 1 * * *"
+        cleanup_expired_tokens: "false"
+        truncate_indices: "true"
+        truncate_indices_retention_days: 30
+        dataprocess_cleanup:
+          retention_days: 30
+          delete_empty_data_jobs: "true"
+          delete_empty_data_flows: "true"
+          hard_delete_entities: "false"
+          keep_last_n: 10
+        soft_deleted_entities_cleanup:
+          retention_days: 30
+  podAnnotations: {}
   resources:
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 2Gi
     requests:
       cpu: 300m
-      memory: 256Mi
+      memory: 2Gi
   # Add extra sidecar containers to job pod
-  extraSidecars: [ ]
-  # - name: my-image-name
-  #   image: my-image
-  #   imagePullPolicy: Always
-  extraInitContainers: [ ]
+  extraSidecars: []
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
+  extraInitContainers: []
 
 global:
   strict_mode: true
   graph_service_impl: elasticsearch
   datahub_analytics_enabled: true
-  datahub_standalone_consumers_enabled: true
+  datahub_standalone_consumers_enabled: false
+  imageRegistry: "docker.io"
 
   elasticsearch:
     host: "elasticsearch-master"
+    # If you want to use OpenSearch instead of ElasticSearch use different hostname below
+    # host: "opensearch-cluster-master"
     port: "9200"
     skipcheck: "false"
     insecure: "false"
@@ -468,8 +510,18 @@ global:
 
       ## Index settings can be overridden for entity indices or other indices on an index by index basis
       ## Some index settings, such as # of shards, requires reindexing while others, i.e. replicas, do not
+      ## The index settings options can be specified as a string or a map (which is converted to a string
+      ## representation)
+      ##
       ## Non-Entity indices do not require the prefix
       # settingsOverrides: '{"graph_service_v1":{"number_of_shards":"5"},"system_metadata_service_v1":{"number_of_shards":"5"}}'
+      ## or
+      # settingsOverrides:
+      #   graph_service_v1:
+      #     number_of_shards: '5'
+      #   system_metadata_service_v1:
+      #     number_of_shards: '6'
+      #
       ## Entity indices do not require the prefix or suffix
       # entitySettingsOverrides: '{"dataset":{"number_of_shards":"10"}}'
 
@@ -534,78 +586,50 @@ global:
           # functionScores - See the following for function score syntax
           # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/query-dsl-function-score-query.html
 
-          x-search-common: &searchCommon
-            - filter:
-                term:
-                  materialized:
-                    value: true
-              weight: 0.8
-            - filter:
-                term:
-                  deprecated:
-                    value: false
-              weight: 0.01
-            - filter:
-                terms:
-                  platform.keyword:
-                    - urn:li:dataPlatform:deltaLake
-              weight: 5.0
-            - bool:
-                should:
-                  - match:
-                      name.keyword: master
-                  - match:
-                      browsePathV2.keyword: master
-                  - match:
-                      urn.keyword: master
-              weight: 3.0
-            - filter:
-                terms:
-                  urn.keyword:
-                    - urn:li:corpuser
-                    - urn:li:corpgroup
-              weight: 0.1
-
-          x-search-hide-deprecated: &searchHideDeprecated
-            must_not:
-              term:
-                deprecated:
-                  value: true
-
           queryConfigurations:
-            #            # Select *
-            #            - queryRegex: '[*]|'
-            #              simpleQuery: false
-            #              prefixMatchQuery: false
-            #              exactMatchQuery: false
-            #              #              boolQuery: *searchHideDeprecated
-            #              functionScore:
-            #                query: *searchBoostMaster
-            #                functions: *searchCommon
-            #                score_mode: multiply
-            #                boost_mode: multiply
-            #
-            #            # Criteria for exact-match only
-            #            # Contains quoted or contains underscore then use exact match query
-            #            - queryRegex: >-
-            #                ["'].+["']|\S+_\S+
-            #              simpleQuery: false
-            #              prefixMatchQuery: true
-            #              exactMatchQuery: true
-            #              boolQuery: *searchHideDeprecated
-            #              functionScore:
-            #                functions: *searchCommon
-            #                score_mode: multiply
-            #                boost_mode: multiply
+            # Select *
+            - queryRegex: '[*]|'
+              simpleQuery: false
+              prefixMatchQuery: false
+              exactMatchQuery: false
+              functionScore:
+                functions:
+                  - filter:
+                      term:
+                        deprecated:
+                          value: true
+                    weight: 0.5
+                score_mode: multiply
+                boost_mode: multiply
 
+            # Criteria for exact-match only
+            # Contains quoted or contains underscore then use exact match query
+            - queryRegex: >-
+                ["'].+["']|\S+_\S+
+              simpleQuery: false
+              prefixMatchQuery: true
+              exactMatchQuery: true
+              functionScore:
+                functions:
+                  - filter:
+                      term:
+                        deprecated:
+                          value: true
+                    weight: 0.5
+                score_mode: multiply
+                boost_mode: multiply
             # default
             - queryRegex: .*
               simpleQuery: true
               prefixMatchQuery: true
               exactMatchQuery: true
-              #              boolQuery: *searchHideDeprecated
               functionScore:
-                functions: *searchCommon
+                functions:
+                  - filter:
+                      term:
+                        deprecated:
+                          value: true
+                    weight: 0.5
                 score_mode: multiply
                 boost_mode: multiply
 
@@ -627,6 +651,39 @@ global:
       metadata_change_log_timeseries_topic_name: "MetadataChangeLog_Timeseries_v1"
       platform_event_topic_name: "PlatformEvent_v1"
       datahub_upgrade_history_topic_name: "DataHubUpgradeHistory_v1"
+    consumer_groups:
+      datahub_upgrade_history_kafka_consumer_group_id: {}
+      #   gms: "<<release-name>>-duhe-consumer-job-client-gms"
+      #   mae-consumer: "<<release-name>>-duhe-consumer-job-client-mcl"
+      #   mce-consumer: "<<release-name>>-duhe-consumer-job-client-mcp"
+      datahub_actions_ingestion_executor_consumer_group_id: "ingestion_executor"
+      datahub_actions_slack_consumer_group_id: "datahub_slack_action"
+      datahub_actions_teams_consumer_group_id: "datahub_teams_action"
+      datahub_usage_event_kafka_consumer_group_id: "datahub-usage-event-consumer-job-client"
+      metadata_change_log_kafka_consumer_group_id: "generic-mae-consumer-job-client"
+      platform_event_kafka_consumer_group_id: "generic-platform-event-job-client"
+      metadata_change_event_kafka_consumer_group_id: "mce-consumer-job-client"
+      metadata_change_proposal_kafka_consumer_group_id: "generic-mce-consumer-job-client"
+    metadataChangeLog:
+      hooks:
+        siblings:
+          enabled: true
+          consumerGroupSuffix: ''
+        updateIndices:
+          enabled: true
+          consumerGroupSuffix: ''
+        ingestionScheduler:
+          enabled: true
+          consumerGroupSuffix: ''
+        incidents:
+          enabled: true
+          consumerGroupSuffix: ''
+        entityChangeEvents:
+          enabled: true
+          consumerGroupSuffix: ''
+        forms:
+          enabled: true
+          consumerGroupSuffix: ''
     maxMessageBytes: "5242880"  # 5MB
     producer:
       compressionType: none
@@ -651,8 +708,8 @@ global:
       #   registry: datahub
 
   neo4j:
-    host: "prerequisites-neo4j-community:7474"
-    uri: "bolt://prerequisites-neo4j-community"
+    host: "prerequisites-neo4j:7474"
+    uri: "bolt://prerequisites-neo4j"
     username: "neo4j"
     password:
       secretRef: neo4j-secrets
@@ -707,11 +764,14 @@ global:
       #   value: password
 
   datahub:
-    version: v0.14.0.2
+    version: v1.0.0
     gms:
       protocol: "http"
       port: "8080"
       nodePort: "30001"
+
+    # Used for scheduled tasks
+    timezone: "UTC"
 
     frontend:
       validateSignUpEmail: true
@@ -725,7 +785,7 @@ global:
       port: "9091"
       nodePort: "30002"
 
-    appVersion: "1.0"
+    appVersion: "1.0.0"
     systemUpdate:
       ## The following options control settings for datahub-upgrade job which will
       ## managed ES indices and other update related work
@@ -738,14 +798,14 @@ global:
       provisionSecret:
         enabled: true
         autoGenerate: true
-        annotations: { }
+        annotations: {}
       # Only specify if autoGenerate set to false
       #  secretValues:
       #    encryptionKey: <encryption key value>
 
     managed_ingestion:
       enabled: true
-      defaultCliVersion: "0.14.0.2"
+      defaultCliVersion: "1.0.0"
 
     metadata_service_authentication:
       enabled: true
@@ -764,7 +824,7 @@ global:
       provisionSecrets:
         enabled: true
         autoGenerate: true
-        annotations: { }
+        annotations: {}
       # Only specify if autoGenerate set to false
       #  secretValues:
       #    secret: <secret value>
@@ -777,30 +837,58 @@ global:
     ## Enables diff mode for graph writes, uses a different code path that produces a diff from previous to next to write relationships instead of wholesale deleting edges and reading
     enableGraphDiffMode: true
 
-    cache:
-      search:
-        ## Enable general search caching
-        enabled: true
-        ## Configuration for the primary cache
-        primary:
-          ttlSeconds: 600
-          maxSize: 10000
-        ## Configuration for homepage cache
-        homepage:
-          entityCounts:
-            ttlSeconds: 600
-        ## Lineage specific caching options
-        lineage:
-          ## Enables in-memory cache for searchAcrossLineage query
-          enabled: false
-          ttlSeconds: 86400
-          lightningThreshold: 300
+    ## Enable stricter URN validation logic
+    strictUrnValidation: false
+    
 
     ## Values specific to the unified search and browse feature.
     search_and_browse:
       show_search_v2: true  # If on, show the new search filters experience as of v0.10.5
       show_browse_v2: true  # If on, show the new browse experience as of v0.10.5
       backfill_browse_v2: true  # If on, run the backfill upgrade job that generates default browse paths for relevant entities
+
+    ## v0.15.0+
+    metadataChangeProposal:
+      consumer:
+        batch:
+          enabled: false
+
+
+    ## v0.13.4+
+    mcp:
+      throttle:
+        # updateIntervalMs: 60000
+        mceConsumer:  # v0.14.2+
+          enabled: false
+        apiRequests:  # v0.14.2+
+          enabled: false
+        ## Versioned MCL topic
+        versioned:
+          ## Whether to throttle MCP processing based on MCL backlog
+          enabled: true
+        #  threshold: 4000
+        #  maxAttempts: 1000
+        #  initialIntervalMs: 100
+        #  multiplier: 10
+        #  maxIntervalMs:  30000
+        # Timeseries MCL topic
+        timeseries:
+          ## Whether to throttle MCP processing based on MCL backlog
+          enabled: false
+        #  threshold: 4000
+        #  maxAttempts: 1000
+        #  initialIntervalMs: 100
+        #  multiplier: 10
+        #  maxIntervalMs: 30000
+
+    ## v0.15.0+
+    entityVersioning:
+      enabled: false
+
+    ## Enables a fast path for processing events sourced from the UI, updates indices synchronously for requests originating from GraphQL
+    preProcessHooksUIEnabled: true
+    ## Reprocess UI events at MAE Consumer, normally if preprocess is enabled this is not required.
+    reProcessUIEventHooks: false
 
 #  hostAliases:
 #    - ip: "192.168.0.104"
