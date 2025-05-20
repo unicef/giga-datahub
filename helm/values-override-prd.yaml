@@ -25,9 +25,9 @@ datahub-frontend:
     - name: AUTH_VERBOSE_LOGGING
       value: "true"
     - name: REACT_APP_LOGO_URL
-      value: https://storage.googleapis.com/giga-test-app-static-assets/giga-logo-datahub.png
+      value: https://saunigigashare.blob.core.windows.net/assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL
-      value: https://storage.googleapis.com/giga-test-app-static-assets/GIGA_logo_blue.png
+      value: https://saunigigashare.blob.core.windows.net/assets/GIGA_logo_blue.png
 
 global:
   elasticsearch:
