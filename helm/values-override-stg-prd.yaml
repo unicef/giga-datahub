@@ -4,3 +4,4 @@ datahub-gms:
 global:
   elasticsearch:
     host: elasticsearch-master-headless
+  datahub_standalone_consumers_enabled: true  # Enable standalone mode to allow multiple GMS instances with managed ingestion
