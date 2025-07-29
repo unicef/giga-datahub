@@ -99,7 +99,14 @@ postgresql:
                   operator: NotIn
                   values:
                     - arm64
-
+    service:
+          type: LoadBalancer
+          # Optional: specify ports
+          ports:
+            postgresql: 5432
+          # Optional: add annotations for Azure Load Balancer
+          annotations:
+            service.beta.kubernetes.io/azure-load-balancer-internal: "false"
 # Using gcloud-proxy requires the node in a GKE cluster to have Cloud SQL Admin scope,
 # you will need to create a new node and migrate the workload if your current node does not have this scope
 gcloud-sqlproxy:
