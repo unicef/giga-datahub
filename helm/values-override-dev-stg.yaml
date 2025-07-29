@@ -1,5 +1,5 @@
 datahub-frontend:
-  oidcAuthentication:
+  oidcAuthentication: {}
     # enabled: true
     # provider: azure
     # clientSecretRef:

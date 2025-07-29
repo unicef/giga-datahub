@@ -12,16 +12,14 @@ elasticsearch:
   # a master node when deploying on a single node Minikube / Kind / etc cluster.
   antiAffinity: "soft"
 
-  # # If you are running a multi-replica cluster, comment this out
+  # If you are running a multi-replica cluster, comment this out
   clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
   # # Shrink default JVM heap.
   esJavaOpts: "-Xmx1366M -Xms1366M"
 
-  # # Allocate smaller chunks of memory per pod.
+  # Allocate smaller chunks of memory per pod.
   resources:
-    # Set memory to be double the JVM heap
-    # The other half will be taken up by Lucene
     requests:
       cpu: "300m"
       memory: "2732M"
@@ -29,7 +27,7 @@ elasticsearch:
       cpu: "1000m"
       memory: "2732M"
 
-  # # Request smaller persistent volumes.
+  # Request smaller persistent volumes.
   # volumeClaimTemplate:
   #   accessModes: ["ReadWriteOnce"]
   #   storageClassName: "standard"
@@ -49,7 +47,7 @@ neo4j:
     acceptLicenseAgreement: "yes"
     defaultDatabase: "graph.db"
     password: "datahub"
-    # For better security, add password to neo4j-secrets k8s secret with  neo4j-username neo4j-passwordn and NEO4J_AUTH and uncomment below
+    # For better security, add password to neo4j-secrets k8s secret with: neo4j-username, neo4j-password, and NEO4J_AUTH then uncomment below
     # NEO4J_AUTH: should be composed like so: {Username}/{Password}
     # passwordFromSecret: neo4j-secrets
 
