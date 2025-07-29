@@ -13,11 +13,10 @@ datahub-gms:
     # args: []
   resources:
     limits:
-      cpu: 1500m
       memory: 2Gi
     requests:
       cpu: 100m
-      memory: 1536Mi
+      memory: 1Gi
   livenessProbe:
     initialDelaySeconds: 60
     periodSeconds: 30
@@ -28,7 +27,7 @@ datahub-gms:
     failureThreshold: 8
   theme_v2:
     enabled: true
-    default: false
+    default: true
     toggeable: true
   # Optionaly specify service type for datahub-gms: LoadBalancer, ClusterIP or NodePort, by default: LoadBalancer
   service:
@@ -243,7 +242,7 @@ mysqlSetupJob:
     requests:
       cpu: 300m
       memory: 256Mi
-  extraInitContainers: [ ]
+  extraInitContainers: []
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -254,17 +253,17 @@ mysqlSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: { }
+  podAnnotations: {}
   # Optionally set a set-up job specific login (defaults to global login)
   # username: "mysqlSetupJob-login"
   # password:
   #   secretRef: mysqlSetupJob-secret
   #   secretKey: mysqlSetupJob-password
   # Add extra sidecar containers to job pod
-  extraSidecars: [ ]
-  # - name: my-image-name
-  #   image: my-image
-  #   imagePullPolicy: Always
+  extraSidecars: []
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
 
 postgresqlSetupJob:
   enabled: *doSetupJobs
@@ -282,7 +281,7 @@ postgresqlSetupJob:
     requests:
       cpu: 300m
       memory: 256Mi
-  extraInitContainers: [ ]
+  extraInitContainers: []
   podSecurityContext:
     fsGroup: 1000
   securityContext:
@@ -293,17 +292,17 @@ postgresqlSetupJob:
     helm.sh/hook: pre-install,pre-upgrade
     helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: before-hook-creation
-  podAnnotations: { }
+  podAnnotations: {}
   # Optionally set a set-up job specific login (defaults to global login)
   # username: "postgresqlSetupJob-login"
   # password:
   #   secretRef: postgresqlSetupJob-secret
   #   secretKey: postgresqlSetupJob-password
   # Add extra sidecar containers to job pod
-  extraSidecars: [ ]
-  # - name: my-image-name
-  #   image: my-image
-  #   imagePullPolicy: Always
+  extraSidecars: []
+    # - name: my-image-name
+    #   image: my-image
+    #   imagePullPolicy: Always
   # Optionally set a specific database using extraEnvs
   # extraEnvs: []
   #   - name: "DATAHUB_DB_NAME"
@@ -311,24 +310,16 @@ postgresqlSetupJob:
 
 ## No code data migration
 datahubUpgrade:
-  enabled: *doSetupJobs
+  enabled: true
   image:
     repository: acryldata/datahub-upgrade
     # tag: "v0.11.0"  # defaults to .global.datahub.version
   batchSize: 1000
   batchDelayMs: 100
-  noCodeDataMigration:
-    image:
-      # Add custom command / arguments to this job.  Useful if you need a custom startup or shutdown script
-      # to run
-      command:
-      args: [ ]
-    # sqlDbType: "MYSQL"
-    sqlDbType: "POSTGRES"
-  podSecurityContext: { }
-  # fsGroup: 1000
-  securityContext: { }
-  # runAsUser: 1000
+  podSecurityContext: {}
+    # fsGroup: 1000
+  securityContext: {}
+    # runAsUser: 1000
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
@@ -485,6 +476,10 @@ datahubSystemUpdate:
   extraInitContainers: []
 
 global:
+  # Uncomment and customize the following section to add custom labels to your pods
+  # podLabels:
+  #   name: datahub
+  #   environment: production
   strict_mode: true
   graph_service_impl: elasticsearch
   datahub_analytics_enabled: true
@@ -499,6 +494,16 @@ global:
     skipcheck: "false"
     insecure: "false"
     useSSL: "false"
+
+    # Authentication
+    # auth:
+      # username: "elastic"
+      # password:
+        # Value can be directly specified here, or stored in a secret with secretRef
+        # value: "<password>"
+        # or
+        # secretRef: <secret-ref>
+        # secretKey: <secret-key>
     # If you want to specify index prefixes use indexPrefix
     # indexPrefix: "dh"
 
@@ -548,6 +553,10 @@ global:
         ## ensures a complete backup of the original index is preserved.
         allowDocCountMismatch: false
 
+        ## Only disable for OpenSearch/ElasticSearch clusters with zone awareness, otherwise optimization should be utilized
+        ## Will use full replication during reindexing which will make the process slower
+        reindexOptimizationEnabled: true
+
     ## Search related configuration
     search:
       ## Maximum terms in aggregations
@@ -571,7 +580,7 @@ global:
       ## Configuration for graph service dao
       graph:
         ## graph dao timeout seconds
-        timeoutSeconds: 90
+        timeoutSeconds: 50
         ## graph dao batch size
         batchSize: 1000
         ## graph dao max result size
@@ -660,6 +669,7 @@ global:
       #   gms: "<<release-name>>-duhe-consumer-job-client-gms"
       #   mae-consumer: "<<release-name>>-duhe-consumer-job-client-mcl"
       #   mce-consumer: "<<release-name>>-duhe-consumer-job-client-mcp"
+      # datahub_actions_doc_propagation_consumer_group_id: "datahub_doc_propagation_action"
       datahub_actions_ingestion_executor_consumer_group_id: "ingestion_executor"
       datahub_actions_slack_consumer_group_id: "datahub_slack_action"
       datahub_actions_teams_consumer_group_id: "datahub_teams_action"
@@ -768,7 +778,7 @@ global:
       #   value: password
 
   datahub:
-    version: v1.0.0
+    version: v1.2.0
     gms:
       protocol: "http"
       port: "8080"
@@ -793,7 +803,7 @@ global:
     systemUpdate:
       ## The following options control settings for datahub-upgrade job which will
       ## managed ES indices and other update related work
-      enabled: *doSetupJobs
+      enabled: true
 
     encryptionKey:
       secretRef: "datahub-encryption-secrets"
@@ -843,7 +853,6 @@ global:
 
     ## Enable stricter URN validation logic
     strictUrnValidation: false
-    
 
     ## Values specific to the unified search and browse feature.
     search_and_browse:
