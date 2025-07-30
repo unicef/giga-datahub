@@ -6,8 +6,7 @@ variables:
   datahubUserProps: $(DATAHUB_USER_PROPS)
   deployEnv: $(DEPLOY_ENV)
   ingressHost: $(INGRESS_HOST)
-  azureTenantId: $(AZURE_DIRECTORY_TENANT_ID)
-  azureClientId: $(AZURE_APPLICATION_CLIENT_ID)
-  azureClientSecret: $(AZURE_CLIENT_SECRET)
-  # azurePolicyName: $(AZURE_AUTH_POLICY_NAME)
+  azureTenantId: $(AZURE_TENANT_ID)
+  azureTenantName: $(AZURE_TENANT_NAME)
+  azurePolicyName: $(AZURE_AUTH_POLICY_NAME)
   system.debug: true
