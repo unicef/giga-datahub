@@ -30,22 +30,9 @@ jobs:
                   --timeout 1h
                   --values helm/values-override-dev-stg.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
-                  --set datahub-frontend.extraEnvs[0].name="AUTH_OIDC_ENABLED"
-                  --set-string datahub-frontend.extraEnvs[0].value="true"
-                  --set datahub-frontend.extraEnvs[1].name="AUTH_OIDC_CLIENT_ID"
-                  --set datahub-frontend.extraEnvs[1].value="$(azureClientId)"
-                  --set datahub-frontend.extraEnvs[2].name="AUTH_OIDC_CLIENT_SECRET"
-                  --set datahub-frontend.extraEnvs[2].value="$(azureClientSecret)"
-                  --set datahub-frontend.extraEnvs[3].name="AUTH_OIDC_DISCOVERY_URI"
-                  --set datahub-frontend.extraEnvs[3].value="https://login.microsoftonline.com/$(azureTenantId)/v2.0/.well-known/openid-configuration"
-                  --set datahub-frontend.extraEnvs[4].name="AUTH_OIDC_BASE_URL"
-                  --set datahub-frontend.extraEnvs[4].value="https://$(ingressHost)"
-                  --set datahub-frontend.extraEnvs[5].name="AUTH_VERBOSE_LOGGING"
-                  --set-string datahub-frontend.extraEnvs[5].value="true"
-                  --set datahub-frontend.extraEnvs[6].name="REACT_APP_LOGO_URL"
-                  --set datahub-frontend.extraEnvs[6].value="https://saunigigashare.blob.core.windows.net/assets/giga-logo-datahub.png"
-                  --set datahub-frontend.extraEnvs[7].name="REACT_APP_FAVICON_URL"
-                  --set datahub-frontend.extraEnvs[7].value="https://saunigigashare.blob.core.windows.net/assets/GIGA_logo_blue.png"
+                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
+                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub stg
               condition: eq(variables.environment, 'stg')
