@@ -32,11 +32,7 @@ datahub-gms:
     toggeable: true
   # Optionaly specify service type for datahub-gms: LoadBalancer, ClusterIP or NodePort, by default: LoadBalancer
   service:
-    type: LoadBalancer
-    port: 8080
-    annotations:
-      service.beta.kubernetes.io/azure-load-balancer-internal: "false"  # Set to true if you want internal load balancer
-
+    type: ClusterIP
   # Optionally set a GMS specific SQL login (defaults to global login)
   # sql:
   #   datasource:
