@@ -22,7 +22,7 @@ jobs:
                 command: upgrade
                 chartType: Name
                 chartName: datahub/datahub
-                chartVersion: 0.6.0
+                chartVersion: 0.6.15
                 releaseName: datahub
                 valueFile: helm/values.yaml
                 namespace: $(kubernetesNamespace)
@@ -41,7 +41,7 @@ jobs:
                 command: upgrade
                 chartType: Name
                 chartName: datahub/datahub
-                chartVersion: 0.6.0
+                chartVersion: 0.6.15
                 releaseName: datahub
                 valueFile: helm/values.yaml
                 namespace: $(kubernetesNamespace)
