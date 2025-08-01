@@ -24,10 +24,10 @@ elasticsearch:
     # The other half will be taken up by Lucene
     requests:
       cpu: "300m"
-      memory: "2732M"
+      memory: "2Gi"
     limits:
       cpu: "1000m"
-      memory: "2732M"
+      memory: "6Gi"
 
   # # Request smaller persistent volumes.
   # volumeClaimTemplate:
@@ -99,6 +99,13 @@ postgresql:
                   operator: NotIn
                   values:
                     - arm64
+  resources:
+    requests:
+      cpu: "10m"
+      memory: "128Mi"
+    limits:
+      cpu: "100m"
+      memory: "512Mi"
 
 # Using gcloud-proxy requires the node in a GKE cluster to have Cloud SQL Admin scope,
 # you will need to create a new node and migrate the workload if your current node does not have this scope
@@ -168,7 +175,29 @@ kafka:
       default.replication.factor=1
       offsets.topic.replication.factor=1
       transaction.state.log.replication.factor=1
+    initContainerResources:
+      requests:
+        cpu: "10m"
+        memory: "1Gi"
+      limits:
+        cpu: "100m"
+        memory: "2Gi"
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "1Gi"
+      limits:
+        cpu: "100m"
+        memory: "2Gi"
   kraft:
     enabled: false
   zookeeper:
     enabled: true
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "700Mi"
+      limits:
+        cpu: "100m"
+        memory: "2Gi"
+    

@@ -13,11 +13,11 @@ datahub-gms:
     # args: []
   resources:
     limits:
-      cpu: 1500m
-      memory: 2Gi
+      cpu: 1000m
+      memory: 4Gi
     requests:
-      cpu: 100m
-      memory: 1536Mi
+      cpu: 10m
+      memory: 1Gi
   livenessProbe:
     initialDelaySeconds: 60
     periodSeconds: 30
@@ -57,10 +57,11 @@ datahub-frontend:
     # args: []
   resources:
     limits:
-      memory: 1400Mi
-    requests:
       cpu: 100m
-      memory: 768Mi
+      memory: 2Gi
+    requests:
+      cpu: 10m
+      memory: 500Mi
   # Set up ingress to expose react front-end
   ingress:
     enabled: true
@@ -110,10 +111,11 @@ acryl-datahub-actions:
   #   defaultMode: "0444"
   resources:
     limits:
-      memory: 512Mi
+      cpu: 100m  
+      memory: 1Gi
     requests:
-      cpu: 300m
-      memory: 256Mi
+      cpu: 10m
+      memory: 128Mi
 
 datahub-mae-consumer:
   image:
@@ -125,10 +127,11 @@ datahub-mae-consumer:
     # args: []
   resources:
     limits:
-      memory: 1536Mi
-    requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 2Gi
+    requests:
+      cpu: 10m
+      memory: 500Mi
 
 datahub-mce-consumer:
   image:
@@ -140,10 +143,11 @@ datahub-mce-consumer:
     # args: []
   resources:
     limits:
-      memory: 1536Mi
-    requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 2Gi
+    requests:
+      cpu: 10m
+      memory: 500Mi
 
 datahub-ingestion-cron:
   enabled: false

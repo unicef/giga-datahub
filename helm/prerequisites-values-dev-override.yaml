@@ -13,7 +13,7 @@ elasticsearch:
     # The other half will be taken up by Lucene
     requests:
       cpu: "300m"
-      memory: "8G"
+      memory: "8Gi"
     limits:
       cpu: "1000m"
-      memory: "8G"
+      memory: "8Gi"
