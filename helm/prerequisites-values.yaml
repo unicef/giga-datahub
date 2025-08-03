@@ -175,19 +175,30 @@ kafka:
       default.replication.factor=1
       offsets.topic.replication.factor=1
       transaction.state.log.replication.factor=1
+    livenessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+    readinessProbe:
+      failureThreshold: 6
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      successThreshold: 1
+      
     initContainerResources:
       requests:
         cpu: "10m"
         memory: "1Gi"
       limits:
-        cpu: "100m"
+        cpu: "300m"
         memory: "2Gi"
     resources:
       requests:
         cpu: "10m"
         memory: "1Gi"
       limits:
-        cpu: "100m"
+        cpu: "300m"
         memory: "2Gi"
   kraft:
     enabled: false
