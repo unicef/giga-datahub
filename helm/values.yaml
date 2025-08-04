@@ -127,7 +127,7 @@ datahub-mae-consumer:
     # args: []
   resources:
     limits:
-      # cpu: 600m
+      cpu: 1200m
       memory: 2Gi
     requests:
       cpu: 10m
