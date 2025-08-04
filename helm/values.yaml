@@ -133,6 +133,18 @@ datahub-mae-consumer:
       cpu: 10m
       memory: 500Mi
 
+  livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    successThreshold: 1
+  readinessProbe:
+    failureThreshold: 6
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    successThreshold: 1
+      
+
 datahub-mce-consumer:
   image:
     repository: acryldata/datahub-mce-consumer
