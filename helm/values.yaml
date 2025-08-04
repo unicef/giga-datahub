@@ -155,10 +155,11 @@ datahub-mce-consumer:
     # args: []
   resources:
     limits:
-      memory: 1536Mi
+      cpu: 200m
+      memory: 2Gi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 10m
+      memory: 500Mi
 
 datahub-ingestion-cron:
   enabled: false
