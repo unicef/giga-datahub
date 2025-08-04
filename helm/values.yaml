@@ -127,11 +127,10 @@ datahub-mae-consumer:
     # args: []
   resources:
     limits:
-      cpu: 100m
-      memory: 2Gi
+      memory: 1536Mi
     requests:
-      cpu: 10m
-      memory: 500Mi
+      cpu: 100m
+      memory: 256Mi
 
   livenessProbe:
     failureThreshold: 3
@@ -155,11 +154,10 @@ datahub-mce-consumer:
     # args: []
   resources:
     limits:
-      cpu: 100m
-      memory: 2Gi
+      memory: 1536Mi
     requests:
-      cpu: 10m
-      memory: 500Mi
+      cpu: 100m
+      memory: 256Mi
 
 datahub-ingestion-cron:
   enabled: false
