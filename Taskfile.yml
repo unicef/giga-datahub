@@ -88,7 +88,7 @@ tasks:
     cmds:
       - >
         helm upgrade --install prerequisites datahub/datahub-prerequisites
-        --version 0.1.8
+        --version 0.1.15
         --values prerequisites-values.yaml
         --values prerequisites-values-local-override.yaml
         --values prerequisites-values-prd-override.yaml
@@ -105,7 +105,7 @@ tasks:
     cmds:
       - >
         helm upgrade --install datahub datahub/datahub
-        --version 0.4.0
+        --version 0.6.15
         --values values.yaml
         --values values-override-dev-stg.yaml
         --namespace giga-datahub
