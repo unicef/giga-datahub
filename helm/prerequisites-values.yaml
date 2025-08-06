@@ -209,6 +209,6 @@ kafka:
         cpu: "10m"
         memory: "700Mi"
       limits:
-        cpu: "100m"
+        cpu: "200m"
         memory: "2Gi"
     
