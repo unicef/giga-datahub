@@ -1,6 +1,6 @@
 apiVersion: v2
 name: datahub-gms
-description: A Helm chart for LinkedIn DataHub's datahub-gms component
+description: A Helm chart for DataHub's datahub-gms component
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -12,7 +12,7 @@ description: A Helm chart for LinkedIn DataHub's datahub-gms component
 type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-version: 0.2.163
+version: 0.2.186
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: v0.11.0
+appVersion: v1.0.0

@@ -144,3 +144,83 @@ Return the env variables for upgrade jobs
   value: {{ .datahub_upgrade_history_topic_name }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Set up cron hourly custom scheduling
+*/}}
+{{- define "datahub.upgrade.hourlyCronWindow" -}}
+# Generate a random 2 digit numeric string, modulo 60
+schedule: {{ printf "%d * * * * " (mod (randNumeric 2) 60) }}
+{{- end -}}
+
+{{- define "deepMerge" -}}
+{{- $dst := deepCopy .dst -}}
+{{- range $key, $srcValue := .src -}}
+  {{- if hasKey $dst $key -}}
+    {{- $dstValue := index $dst $key -}}
+    {{- if and (kindIs "map" $dstValue) (kindIs "map" $srcValue) -}}
+      {{- $newDst := dict "dst" $dstValue "src" $srcValue -}}
+      {{- $mergedValue := include "deepMerge" $newDst | fromYaml -}}
+      {{- $_ := set $dst $key $mergedValue -}}
+    {{- else -}}
+      {{- $_ := set $dst $key $srcValue -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $_ := set $dst $key $srcValue -}}
+  {{- end -}}
+{{- end -}}
+{{- $dst | toYaml -}}
+{{- end -}}
+
+{{- define "randomHourInRange" -}}
+{{- $start := index . 0 -}}
+{{- $end := index . 1 -}}
+
+{{- if eq $start $end -}}
+  {{- $start -}}
+{{- else -}}
+  {{- $range := int64 0 -}}
+  {{- if lt $end $start -}}
+    {{- /* Range spans midnight */ -}}
+    {{- $range = add (sub (int64 24) $start) $end -}}
+  {{- else -}}
+    {{- $range = sub $end $start -}}
+  {{- end -}}
+  {{- /* Generate a seed using a combination of methods */ -}}
+  {{- $randomString := randAlphaNum 32 -}}
+  {{- $checksum := adler32sum $randomString -}}
+  {{- $currentTime := now | unixEpoch -}}
+  {{- $seed := add (mod (mul $checksum 65537) 1000000) (mod $currentTime 1000000) -}}
+  {{- $randomOffset := mod $seed (add $range 1) -}}
+  {{- mod (add $start $randomOffset) 24 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+datahubGC cron daily custom scheduling
+*/}}
+{{- define "datahub.systemUpdate.datahubGC.dailyCronWindow" -}}
+{{- if hasKey (index .Values.datahubSystemUpdate.bootstrapMCPs.datahubGC.values "schedule" | default dict) "interval" -}}
+schedule:
+  interval: {{ .Values.datahubSystemUpdate.bootstrapMCPs.datahubGC.values.schedule.interval | quote }}
+{{- else }}
+schedule:
+  interval: {{ printf "%d %s * * * " (mod (randNumeric 2) 60) (include "randomHourInRange" (list .Values.datahubSystemUpdate.bootstrapMCPs.datahubGC.dailyCronWindow.startHour .Values.datahubSystemUpdate.bootstrapMCPs.datahubGC.dailyCronWindow.endHour)) }}
+{{- end }}
+{{- end -}}
+
+{{/*
+  timezone
+*/}}
+{{- define "datahub.bootstrapMCPs.default.schedule.timezone" -}}
+schedule:
+  timezone: {{ .Values.global.datahub.timezone | quote }}
+{{- end -}}
+
+{{/*
+  default cli version
+*/}}
+{{- define "datahub.bootstrapMCPs.default.ingestion.version" -}}
+ingestion:
+  version: {{ .Values.global.datahub.managed_ingestion.defaultCliVersion | quote }}
+{{- end -}}

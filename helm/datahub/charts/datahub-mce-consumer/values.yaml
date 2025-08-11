@@ -7,7 +7,7 @@ replicaCount: 1
 revisionHistoryLimit: 10
 
 image:
-  repository: linkedin/datahub-mce-consumer
+  repository: acryldata/datahub-mce-consumer
   pullPolicy: IfNotPresent
   tag:
   # Override the image's command & args with a new one.
@@ -56,6 +56,7 @@ service:
 
 serviceMonitor:
   create: false
+  extraLabels: {}
 
 ingress:
   enabled: false
@@ -120,51 +121,6 @@ tolerations: []
 
 affinity: {}
 
-env:
-  JMXPORT: 1099
-
-exporters:
-  jmx:
-    enabled: false
-#    image:
-#      repository: bitnami/jmx-exporter
-#      tag: 0.15.0
-#      pullPolicy: IfNotPresent
-#    config:
-#      lowercaseOutputName: true
-#      rules:
-#        - pattern: ".*"
-#      startDelaySeconds: 30
-#    env: {}
-#    resources: {}
-#    path: /metrics
-#    ports:
-#      jmxxp:
-#        containerPort: 5556
-#        protocol: TCP
-#    livenessProbe:
-#      httpGet:
-#        path: /metrics
-#        port: jmxxp
-#      initialDelaySeconds: 30
-#      periodSeconds: 15
-#      timeoutSeconds: 60
-#      failureThreshold: 8
-#      successThreshold: 1
-#    readinessProbe:
-#      httpGet:
-#        path: /metrics
-#        port: jmxxp
-#      initialDelaySeconds: 30
-#      periodSeconds: 15
-#      timeoutSeconds: 60
-#      failureThreshold: 8
-#      successThreshold: 1
-#    serviceMonitor:
-#      interval: 30s
-#      scrapeTimeout: 30s
-#      scheme: http
-
 livenessProbe:
   initialDelaySeconds: 60
   periodSeconds: 30
@@ -176,6 +132,8 @@ readinessProbe:
   failureThreshold: 4
 
 global:
+  imageRegistry: "docker.io"
+
   elasticsearch:
     host: "elasticsearch-master"
 
@@ -225,6 +183,9 @@ global:
 
     ## Enables diff mode for graph writes, uses a different code path that produces a diff from previous to next to write relationships instead of wholesale deleting edges and reading
     enableGraphDiffMode: true
+
+    ## Enable stricter URN validation logic
+    strictUrnValidation: false
 
   hostAliases:
     - ip: "192.168.0.104"

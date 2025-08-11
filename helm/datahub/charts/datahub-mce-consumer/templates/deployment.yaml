@@ -8,7 +8,7 @@ metadata:
     {{ $key }}: {{ $val | quote }}
     {{- end }}
 spec:
-  {{- if and (.Values.global.strict_mode) (gt .Values.replicaCount 1.0) (.Values.global.datahub.managed_ingestion.enabled) (.Values.global.datahub_standalone_consumers_enabled)}}
+  {{- if and (.Values.global.strict_mode) (gt (.Values.replicaCount | int) 1) (.Values.global.datahub.managed_ingestion.enabled) (.Values.global.datahub_standalone_consumers_enabled)}}
   {{- fail "\nManaged ingestion can not be used with multiple MCE Processor instances. If you wish to use standalone mode & managed ingestion, please use only 1 MCE replica."}}
   {{- else }}
   replicas:  {{ .Values.replicaCount }}
@@ -65,7 +65,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ required "Global or specific tag is required" (.Values.image.tag | default .Values.global.datahub.version) }}"
+          image: {{ include "datahub.image" (dict "imageRegistry" .Values.global.imageRegistry "version" .Values.global.datahub.version "image" .Values.image) }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.image.command }}
           command: {{ .Values.image.command | toRawJson }}
@@ -97,6 +97,8 @@ spec:
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           env:
+            - name: ENTITY_VERSIONING_ENABLED
+              value: {{ .Values.global.datahub.entityVersioning.enabled | quote }}
             - name: SHOW_SEARCH_FILTERS_V2
               value: {{ .Values.global.datahub.search_and_browse.show_search_v2 | quote }}
             - name: SHOW_BROWSE_V2
@@ -104,8 +106,6 @@ spec:
             - name: BACKFILL_BROWSE_PATHS_V2
               value: {{ .Values.global.datahub.search_and_browse.backfill_browse_v2 | quote }}
             {{- if .Values.global.datahub.systemUpdate.enabled }}
-            - name: DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID
-              value: {{ printf "%s-%s" .Release.Name "duhe-consumer-job-client-mcp" }}
             - name: DATAHUB_REVISION
               value: {{ .Release.Revision | quote }}
             {{- end }}
@@ -234,6 +234,9 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.datahub.metadata_service_authentication.systemClientSecret.secretRef }}
                   key: {{ .Values.global.datahub.metadata_service_authentication.systemClientSecret.secretKey }}
+            {{- else }}
+            - name: METADATA_SERVICE_AUTH_ENABLED
+              value: "false"
             {{- end }}
             {{- if .Values.global.springKafkaConfigurationOverrides }}
             {{- range $configName, $configValue := .Values.global.springKafkaConfigurationOverrides }}
@@ -266,10 +269,86 @@ spec:
             - name: DATAHUB_UPGRADE_HISTORY_TOPIC_NAME
               value: {{ .datahub_upgrade_history_topic_name }}
             {{- end }}
+            {{- if .Values.global.datahub.systemUpdate.enabled }}
+            - name: DATAHUB_UPGRADE_HISTORY_KAFKA_CONSUMER_GROUP_ID
+              value: {{ index .Values.global.kafka.consumer_groups.datahub_upgrade_history_kafka_consumer_group_id "mce-consumer" | default (printf "%s-%s" .Release.Name "duhe-consumer-job-client-mcp")  }}
+            {{- end }}
+            {{- with .Values.global.kafka.consumer_groups }}
+            - name: METADATA_CHANGE_LOG_KAFKA_CONSUMER_GROUP_ID
+              value: {{ .metadata_change_log_kafka_consumer_group_id }}
+            - name: METADATA_CHANGE_EVENT_KAFKA_CONSUMER_GROUP_ID
+              value: {{ .metadata_change_event_kafka_consumer_group_id }}
+            - name: METADATA_CHANGE_PROPOSAL_KAFKA_CONSUMER_GROUP_ID
+              value: {{ .metadata_change_proposal_kafka_consumer_group_id }}
+            {{- end }}
             - name: ALWAYS_EMIT_CHANGE_LOG
               value: {{ .Values.global.datahub.alwaysEmitChangeLog | quote }}
             - name: GRAPH_SERVICE_DIFF_MODE_ENABLED
               value: {{ .Values.global.datahub.enableGraphDiffMode | quote }}
+            {{- with .Values.global.datahub.mcp.throttle }}
+            {{- with .updateIntervalMs }}
+            - name: MCP_THROTTLE_UPDATE_INTERVAL_MS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .mceConsumer.enabled }}
+            - name: MCP_MCE_CONSUMER_THROTTLE_ENABLED
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .versioned.enabled }}
+            - name: MCP_VERSIONED_THROTTLE_ENABLED
+              value: "true"
+            {{- with .versioned.threshold }}
+            - name: MCP_VERSIONED_THRESHOLD
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .versioned.maxAttempts }}
+            - name: MCP_VERSIONED_MAX_ATTEMPTS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .versioned.initialIntervalMs }}
+            - name: MCP_VERSIONED_INITIAL_INTERVAL_MS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .versioned.multiplier }}
+            - name: MCP_VERSIONED_MULTIPLIER
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .versioned.maxIntervalMs }}
+            - name: MCP_VERSIONED_MAX_INTERVAL_MS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .timeseries.enabled }}
+            - name: MCP_TIMESERIES_THROTTLE_ENABLED
+              value: "true"
+            {{- with .timeseries.threshold }}
+            - name: MCP_TIMESERIES_THRESHOLD
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .timeseries.maxAttempts }}
+            - name: MCP_TIMESERIES_MAX_ATTEMPTS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .timeseries.initialIntervalMs }}
+            - name: MCP_TIMESERIES_INITIAL_INTERVAL_MS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .timeseries.multiplier }}
+            - name: MCP_TIMESERIES_MULTIPLIER
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .timeseries.maxIntervalMs }}
+            - name: MCP_TIMESERIES_MAX_INTERVAL_MS
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.global.datahub.strictUrnValidation }}
+            - name: STRICT_URN_VALIDATION_ENABLED
+              value: "{{ . }}"
+            {{- end }}
+            - name: MCP_CONSUMER_BATCH_ENABLED
+              value: {{ .Values.global.datahub.metadataChangeProposal.consumer.batch.enabled | quote }}
           {{- with .Values.extraEnvs }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

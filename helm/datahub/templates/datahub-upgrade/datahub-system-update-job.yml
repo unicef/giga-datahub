@@ -11,7 +11,7 @@ metadata:
   {{- end }}
 spec:
   template:
-    {{- if or .Values.global.podLabels .Values.datahubSystemUpdate.podAnnotations}}
+    {{- if or .Values.global.podLabels .Values.datahubSystemUpdate.podAnnotations }}
     metadata:
     {{- with .Values.datahubSystemUpdate.podAnnotations }}
       annotations:
@@ -44,7 +44,7 @@ spec:
             secretName: {{ .name }}
         {{- end }}
       {{- with .Values.datahubSystemUpdate.extraVolumes }}
-        {{- toYaml . | nindent 8}}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       restartPolicy: Never
       securityContext:
@@ -55,7 +55,7 @@ spec:
       {{- end }}
       containers:
         - name: datahub-system-update-job
-          image: "{{ .Values.datahubSystemUpdate.image.repository }}:{{ required "Global or specific tag is required" (.Values.datahubSystemUpdate.image.tag | default .Values.global.datahub.version) }}"
+          image: {{ include "datahub.image" (dict "imageRegistry" .Values.global.imageRegistry "version" .Values.global.datahub.version "image" .Values.datahubSystemUpdate.image) }}
           imagePullPolicy: {{ .Values.datahubSystemUpdate.image.pullPolicy | default "IfNotPresent" }}
           {{- if .Values.datahubSystemUpdate.image.command }}
           command: {{ .Values.datahubSystemUpdate.image.command | toRawJson }}
@@ -73,9 +73,11 @@ spec:
           {{- end }}
           {{- end }}
           env:
+            - name: ENTITY_VERSIONING_ENABLED
+              value: {{ .Values.global.datahub.entityVersioning.enabled | quote }}
             - name: DATAHUB_REVISION
               value: {{ .Release.Revision | quote }}
-            {{- include "datahub.upgrade.env" . | nindent 12}}
+            {{- include "datahub.upgrade.env" . | nindent 12 }}
             - name: DATAHUB_ANALYTICS_ENABLED
               value: {{ .Values.global.datahub_analytics_enabled | quote }}
             {{- if eq .Values.global.kafka.schemaregistry.type "INTERNAL" }}
@@ -109,12 +111,22 @@ spec:
               value: {{ . | quote }}
             {{- end }}
             {{- with .Values.global.elasticsearch.index.settingsOverrides }}
+            {{- if typeIs "map[string]interface {}" . }}
+            - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_OVERRIDES
+              value: {{ toJson . | quote }}
+            {{- else }}
             - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_OVERRIDES
               value: {{ . | quote }}
             {{- end }}
+            {{- end }}
             {{- with .Values.global.elasticsearch.index.entitySettingsOverrides }}
+            {{- if typeIs "map[string]interface {}" . }}
+            - name: ELASTICSEARCH_INDEX_BUILDER_ENTITY_SETTINGS_OVERRIDES
+              value: {{ toJson . | quote }}
+            {{- else }}
             - name: ELASTICSEARCH_INDEX_BUILDER_ENTITY_SETTINGS_OVERRIDES
               value: {{ . | quote }}
+            {{- end }}
             {{- end }}
             {{- with .Values.global.elasticsearch.index.refreshIntervalSeconds }}
             - name: ELASTICSEARCH_INDEX_BUILDER_REFRESH_INTERVAL_SECONDS
@@ -123,6 +135,27 @@ spec:
             {{- with .Values.global.elasticsearch.index.upgrade.allowDocCountMismatch }}
             - name: ELASTICSEARCH_BUILD_INDICES_ALLOW_DOC_COUNT_MISMATCH
               value: {{ . | quote }}
+            {{- end }}
+            {{- range $k, $v := .Values.datahubSystemUpdate.bootstrapMCPs }}
+            {{- if ne $k "default" }}
+            {{- $result := dict }}
+            {{- range $.Values.datahubSystemUpdate.bootstrapMCPs.default.value_configs }}
+              {{- $funcOutput := include . $ | fromYaml }}
+              {{- $result = include "deepMerge" (dict "dst" $result "src" $funcOutput) | fromYaml }}
+            {{- end }}
+            {{- $valuesCopy := deepCopy $v.values }}
+            {{- $result = include "deepMerge" (dict "dst" $result "src" $valuesCopy) | fromYaml }}
+            {{- range $v.values_generated_configs }}
+              {{- $funcOutput := include . $ | fromYaml }}
+              {{- $result = include "deepMerge" (dict "dst" $result "src" $funcOutput) | fromYaml }}
+            {{- end }}
+            - name: {{ $v.values_env }}
+              value: {{ $result | toJson | quote }}
+            {{- with $v.revision_env }}
+            - name: {{ . }}
+              value: '{"version":"{{ $.Values.global.datahub.version }}-{{ $result | toJson | sha256sum | trunc 7 }}"}'
+            {{- end }}
+            {{- end }}
             {{- end }}
           {{- with .Values.datahubSystemUpdate.extraEnvs }}
             {{- toYaml . | nindent 12 }}
@@ -168,7 +201,7 @@ metadata:
   {{- end }}
 spec:
   template:
-    {{- if or .Values.global.podLabels .Values.datahubSystemUpdate.podAnnotations}}
+    {{- if or .Values.global.podLabels .Values.datahubSystemUpdate.podAnnotations }}
     metadata:
     {{- with .Values.datahubSystemUpdate.podAnnotations }}
       annotations:
@@ -177,8 +210,8 @@ spec:
     {{- with .Values.global.podLabels }}
       labels:
         {{- range $key, $value := . }}
-          {{ $key }}: {{ $value | quote }}
-          {{- end }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
     {{- end }}
     {{- end }}
     spec:
@@ -201,7 +234,7 @@ spec:
             secretName: {{ .name }}
         {{- end }}
       {{- with .Values.datahubSystemUpdate.extraVolumes }}
-        {{- toYaml . | nindent 8}}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       restartPolicy: Never
       securityContext:
@@ -212,7 +245,7 @@ spec:
       {{- end }}
       containers:
         - name: datahub-system-update-job
-          image: "{{ .Values.datahubSystemUpdate.image.repository }}:{{ required "Global or specific tag is required" (.Values.datahubSystemUpdate.image.tag | default .Values.global.datahub.version) }}"
+          image: {{ include "datahub.image" (dict "imageRegistry" .Values.global.imageRegistry "version" .Values.global.datahub.version "image" .Values.datahubSystemUpdate.image) }}
           imagePullPolicy: {{ .Values.datahubSystemUpdate.image.pullPolicy | default "IfNotPresent" }}
           {{- if .Values.datahubSystemUpdate.image.command }}
           command: {{ .Values.datahubSystemUpdate.image.command | toRawJson }}
@@ -227,9 +260,11 @@ spec:
           env:
             - name: DATAHUB_REVISION
               value: {{ .Release.Revision | quote }}
-            {{- include "datahub.upgrade.env" . | nindent 12}}
+            {{- include "datahub.upgrade.env" . | nindent 12 }}
             - name: DATAHUB_ANALYTICS_ENABLED
               value: {{ .Values.global.datahub_analytics_enabled | quote }}
+            - name: ENTITY_VERSIONING_ENABLED
+              value: {{ .Values.global.datahub.entityVersioning.enabled | quote }}
             {{- if eq .Values.global.kafka.schemaregistry.type "INTERNAL" }}
             - name: SCHEMA_REGISTRY_SYSTEM_UPDATE
               value: "true"
@@ -250,6 +285,8 @@ spec:
               value: "{{ . }}"
             {{- end }}
             {{- end }}
+            - name: ELASTICSEARCH_BUILD_INDICES_REINDEX_OPTIMIZATION_ENABLED
+              value: {{ .Values.global.elasticsearch.index.upgrade.reindexOptimizationEnabled | quote }}
             - name: ELASTICSEARCH_BUILD_INDICES_CLONE_INDICES
               value: {{ .Values.global.elasticsearch.index.upgrade.cloneIndices | quote }}
             {{- with .Values.global.elasticsearch.index.enableMappingsReindex }}
@@ -261,12 +298,22 @@ spec:
               value: {{ . | quote }}
             {{- end }}
             {{- with .Values.global.elasticsearch.index.settingsOverrides }}
+            {{- if typeIs "map[string]interface {}" . }}
+            - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_OVERRIDES
+              value: {{ toJson . | quote }}
+            {{- else }}
             - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_OVERRIDES
               value: {{ . | quote }}
             {{- end }}
+            {{- end }}
             {{- with .Values.global.elasticsearch.index.entitySettingsOverrides }}
+            {{- if typeIs "map[string]interface {}" . }}
+            - name: ELASTICSEARCH_INDEX_BUILDER_ENTITY_SETTINGS_OVERRIDES
+              value: {{ toJson . | quote }}
+            {{- else }}
             - name: ELASTICSEARCH_INDEX_BUILDER_ENTITY_SETTINGS_OVERRIDES
               value: {{ . | quote }}
+            {{- end }}
             {{- end }}
             {{- with .Values.global.elasticsearch.index.refreshIntervalSeconds }}
             - name: ELASTICSEARCH_INDEX_BUILDER_REFRESH_INTERVAL_SECONDS
@@ -276,23 +323,44 @@ spec:
             - name: ELASTICSEARCH_BUILD_INDICES_ALLOW_DOC_COUNT_MISMATCH
               value: {{ . | quote }}
             {{- end }}
+            {{- range $k, $v := .Values.datahubSystemUpdate.bootstrapMCPs }}
+            {{- if ne $k "default" }}
+            {{- $result := dict }}
+            {{- range $.Values.datahubSystemUpdate.bootstrapMCPs.default.value_configs }}
+              {{- $funcOutput := include . $ | fromYaml }}
+              {{- $result = include "deepMerge" (dict "dst" $result "src" $funcOutput) | fromYaml }}
+            {{- end }}
+            {{- $valuesCopy := deepCopy $v.values }}
+            {{- $result = include "deepMerge" (dict "dst" $result "src" $valuesCopy) | fromYaml }}
+            {{- range $v.values_generated_configs }}
+              {{- $funcOutput := include . $ | fromYaml }}
+              {{- $result = include "deepMerge" (dict "dst" $result "src" $funcOutput) | fromYaml }}
+            {{- end }}
+            - name: {{ $v.values_env }}
+              value: {{ $result | toJson | quote }}
+            {{- with $v.revision_env }}
+            - name: {{ . }}
+              value: '{"version":"{{ $.Values.global.datahub.version }}-{{ $result | toJson | sha256sum | trunc 7 }}"}'
+            {{- end }}
+            {{- end }}
+            {{- end }}
           {{- with .Values.datahubSystemUpdate.extraEnvs }}
-          {{- toYaml . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           securityContext:
             {{- toYaml .Values.datahubSystemUpdate.securityContext | nindent 12 }}
           volumeMounts:
           {{- with .Values.global.credentialsAndCertsSecrets }}
-          - name: datahub-certs-dir
-            mountPath: {{ .path | default "/mnt/certs" }}
+            - name: datahub-certs-dir
+              mountPath: {{ .path | default "/mnt/certs" }}
           {{- end }}
           {{- with .Values.datahubSystemUpdate.extraVolumeMounts }}
-          {{- toYaml . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.datahubSystemUpdate.resources | nindent 12 }}
         {{- with .Values.datahubSystemUpdate.extraSidecars }}
-        {{- toYaml . | nindent 8 }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with default .Values.global.nodeSelector .Values.datahubSystemUpdate.nodeSelector }}
       nodeSelector:

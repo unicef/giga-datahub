@@ -1,21 +1,21 @@
 dependencies:
 - name: datahub-gms
   repository: file://./subcharts/datahub-gms
-  version: 0.2.163
+  version: 0.2.186
 - name: datahub-frontend
   repository: file://./subcharts/datahub-frontend
-  version: 0.2.156
+  version: 0.2.163
 - name: datahub-mae-consumer
   repository: file://./subcharts/datahub-mae-consumer
-  version: 0.2.157
+  version: 0.2.166
 - name: datahub-mce-consumer
   repository: file://./subcharts/datahub-mce-consumer
-  version: 0.2.159
+  version: 0.2.170
 - name: datahub-ingestion-cron
   repository: file://./subcharts/datahub-ingestion-cron
-  version: 0.2.142
+  version: 0.2.148
 - name: acryl-datahub-actions
   repository: file://./subcharts/acryl-datahub-actions
-  version: 0.2.144
-digest: sha256:65e858a3893823573480fa425629ed960e91805c92f4818e1684e2f0c1ee685b
-generated: "2024-03-04T17:23:17.970772751Z"
+  version: 0.2.152
+digest: sha256:47cd20846a03f5d4d85098411363dfd779d7ca18790cc65f35cd9ab04ef4204e
+generated: "2025-07-22T17:19:25.853275578Z"

@@ -7,7 +7,7 @@ replicaCount: 1
 revisionHistoryLimit: 10
 
 image:
-  repository: linkedin/datahub-mae-consumer
+  repository: acryldata/datahub-mae-consumer
   pullPolicy: IfNotPresent
   tag:
   # Override the image's command & args with a new one.
@@ -32,6 +32,7 @@ serviceAccount:
 
 serviceMonitor:
   create: false
+  extraLabels: {}
 
 podAnnotations: {}
   # co.elastic.logs/enabled: "true"
@@ -119,51 +120,6 @@ tolerations: []
 
 affinity: {}
 
-env:
-  JMXPORT: 1099
-
-exporters:
-  jmx:
-    enabled: false
-#    image:
-#      repository: bitnami/jmx-exporter
-#      tag: 0.15.0
-#      pullPolicy: IfNotPresent
-#    config:
-#      lowercaseOutputName: true
-#      rules:
-#        - pattern: ".*"
-#      startDelaySeconds: 30
-#    env: {}
-#    resources: {}
-#    path: /metrics
-#    ports:
-#      jmxxp:
-#        containerPort: 5556
-#        protocol: TCP
-#    livenessProbe:
-#      httpGet:
-#        path: /metrics
-#        port: jmxxp
-#      initialDelaySeconds: 30
-#      periodSeconds: 15
-#      timeoutSeconds: 60
-#      failureThreshold: 8
-#      successThreshold: 1
-#    readinessProbe:
-#      httpGet:
-#        path: /metrics
-#        port: jmxxp
-#      initialDelaySeconds: 30
-#      periodSeconds: 15
-#      timeoutSeconds: 60
-#      failureThreshold: 8
-#      successThreshold: 1
-#    serviceMonitor:
-#      interval: 30s
-#      scrapeTimeout: 30s
-#      scheme: http
-
 livenessProbe:
   initialDelaySeconds: 60
   periodSeconds: 30
@@ -175,6 +131,8 @@ readinessProbe:
   failureThreshold: 8
 
 global:
+  imageRegistry: "docker.io"
+
   graph_service_impl: elasticsearch
   datahub_analytics_enabled: true
 

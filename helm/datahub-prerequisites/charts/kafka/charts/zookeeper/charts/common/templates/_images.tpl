@@ -114,3 +114,4 @@ Return the proper image version (ingores image revision/prerelease info & fallba
     {{- print .chart.AppVersion -}}
 {{- end -}}
 {{- end -}}
+

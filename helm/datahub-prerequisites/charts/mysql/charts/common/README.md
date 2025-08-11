@@ -11,7 +11,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
 ```
 
-```bash
+```console
 $ helm dependency update
 ```
 
@@ -28,7 +28,7 @@ data:
 
 This chart provides a common template helpers which can be used to develop new charts using [Helm](https://helm.sh) package manager.
 
-Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment and management of Helm Charts in clusters. This Helm chart has been tested on top of [Bitnami Kubernetes Production Runtime](https://kubeprod.io/) (BKPR). Deploy BKPR to get automated TLS certificates, logging and monitoring for your applications.
+Bitnami charts can be used with [Kubeapps](https://kubeapps.dev/) for deployment and management of Helm Charts in clusters.
 
 ## Prerequisites
 
@@ -43,10 +43,11 @@ The following table lists the helpers available in the library which are scoped 
 
 | Helper identifier             | Description                                          | Expected Input                                 |
 |-------------------------------|------------------------------------------------------|------------------------------------------------|
-| `common.affinities.nodes.soft` | Return a soft nodeAffinity definition                | `dict "key" "FOO" "values" (list "BAR" "BAZ")` |
-| `common.affinities.nodes.hard` | Return a hard nodeAffinity definition                | `dict "key" "FOO" "values" (list "BAR" "BAZ")` |
-| `common.affinities.pods.soft`  | Return a soft podAffinity/podAntiAffinity definition | `dict "component" "FOO" "context" $`           |
-| `common.affinities.pods.hard`  | Return a hard podAffinity/podAntiAffinity definition | `dict "component" "FOO" "context" $`           |
+| `common.affinities.nodes.soft`  | Return a soft nodeAffinity definition                 | `dict "key" "FOO" "values" (list "BAR" "BAZ")`  |
+| `common.affinities.nodes.hard`  | Return a hard nodeAffinity definition                 | `dict "key" "FOO" "values" (list "BAR" "BAZ")`  |
+| `common.affinities.pods.soft`   | Return a soft podAffinity/podAntiAffinity definition  | `dict "component" "FOO" "context" $`            |
+| `common.affinities.pods.hard`   | Return a hard podAffinity/podAntiAffinity definition  | `dict "component" "FOO" "context" $`            |
+| `common.affinities.topologyKey` | Return a topologyKey definition                       | `dict "topologyKey" "FOO"`                      |
 
 ### Capabilities
 
@@ -107,12 +108,12 @@ The following table lists the helpers available in the library which are scoped 
 
 ### Secrets
 
-| Helper identifier         | Description                                                  | Expected Input                                                                                                                                                                                                                  |
-|---------------------------|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `common.secrets.name`     | Generate the name of the secret.                             | `dict "existingSecret" .Values.path.to.the.existingSecret "defaultNameSuffix" "mySuffix" "context" $` see [ExistingSecret](#existingsecret) for the structure.                                                                  |
-| `common.secrets.key`      | Generate secret key.                                         | `dict "existingSecret" .Values.path.to.the.existingSecret "key" "keyName"` see [ExistingSecret](#existingsecret) for the structure.                                                                                             |
-| `common.passwords.manage` | Generate secret password or retrieve one if already created. | `dict "secret" "secret-name" "key" "keyName" "providedValues" (list "path.to.password1" "path.to.password2") "length" 10 "strong" false "chartName" "chartName" "context" $`, length, strong and chartNAme fields are optional. |
-| `common.secrets.exists`   | Returns whether a previous generated secret already exists.  | `dict "secret" "secret-name" "context" $`                                                                                                                                                                                       |
+| Helper identifier                 | Description                                                  | Expected Input                                                                                                                                                                                                                  |
+|-----------------------------------|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `common.secrets.name`             | Generate the name of the secret.                             | `dict "existingSecret" .Values.path.to.the.existingSecret "defaultNameSuffix" "mySuffix" "context" $` see [ExistingSecret](#existingsecret) for the structure.                                                                  |
+| `common.secrets.key`              | Generate secret key.                                         | `dict "existingSecret" .Values.path.to.the.existingSecret "key" "keyName"` see [ExistingSecret](#existingsecret) for the structure.                                                                                             |
+| `common.secrets.passwords.manage` | Generate secret password or retrieve one if already created. | `dict "secret" "secret-name" "key" "keyName" "providedValues" (list "path.to.password1" "path.to.password2") "length" 10 "strong" false "chartName" "chartName" "context" $`, length, strong and chartNAme fields are optional. |
+| `common.secrets.exists`           | Returns whether a previous generated secret already exists.  | `dict "secret" "secret-name" "context" $`                                                                                                                                                                                       |
 
 ### Storage
 
@@ -335,7 +336,7 @@ $ helm install test mychart --set path.to.value00="",path.to.value01=""
 
 ## License
 
-Copyright &copy; 2022 Bitnami
+Copyright &copy; 2023 Bitnami
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
