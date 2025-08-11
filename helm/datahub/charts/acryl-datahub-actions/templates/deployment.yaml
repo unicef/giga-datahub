@@ -55,7 +55,7 @@ spec:
       {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: "{{ .Values.priorityClassName }}"
-      {{- end }}      
+      {{- end }}
       initContainers:
       {{- if .Values.extraInitContainers }}
       {{- .Values.extraInitContainers | toYaml | nindent 6 }}
@@ -64,12 +64,17 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ include "datahub.image" (dict "imageRegistry" .Values.global.imageRegistry "version" .Values.global.datahub.version "image" .Values.image) }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
               containerPort: 9093
               protocol: TCP
+          {{- if .Values.global.datahub.monitoring.enablePrometheus }}
+            - name: {{ .Values.global.datahub.monitoring.portName }}
+              containerPort: 8000
+              protocol: TCP
+          {{- end }}
           {{- if .Values.image.command }}
           command: {{ .Values.image.command | toRawJson }}
           {{- end }}
@@ -142,6 +147,16 @@ spec:
             - name: PLATFORM_EVENT_TOPIC_NAME
               value: {{ .platform_event_topic_name }}
             {{- end }}
+            {{- with .Values.global.kafka.consumer_groups }}
+            - name: DATAHUB_ACTIONS_DOC_PROPAGATION_CONSUMER_GROUP_ID
+              value: {{ .datahub_actions_doc_propagation_consumer_group_id }}
+            - name: DATAHUB_ACTIONS_INGESTION_EXECUTOR_CONSUMER_GROUP_ID
+              value: {{ .datahub_actions_ingestion_executor_consumer_group_id }}
+            - name: DATAHUB_ACTIONS_SLACK_CONSUMER_GROUP_ID
+              value: {{ .datahub_actions_slack_consumer_group_id }}
+            - name: DATAHUB_ACTIONS_TEAMS_CONSUMER_GROUP_ID
+              value: {{ .datahub_actions_teams_consumer_group_id }}
+            {{- end }}
             {{- if .Values.global.datahub.metadata_service_authentication.enabled }}
             - name: DATAHUB_SYSTEM_CLIENT_ID
               value: {{ .Values.global.datahub.metadata_service_authentication.systemClientId }}
@@ -150,6 +165,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.datahub.metadata_service_authentication.systemClientSecret.secretRef }}
                   key: {{ .Values.global.datahub.metadata_service_authentication.systemClientSecret.secretKey }}
+            {{- end }}
+            {{- if .Values.global.datahub.monitoring.enablePrometheus }}
+            - name: DATAHUB_ACTIONS_MONITORING_ENABLED
+              value: "true"
+            - name: DATAHUB_ACTIONS_MONITORING_PORT
+              value: "8000"
             {{- end }}
           {{- if .Values.extraEnvs }}
             {{ toYaml .Values.extraEnvs | nindent 12 }}

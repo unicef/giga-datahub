@@ -4,10 +4,19 @@
 
 replicaCount: 1
 
+hpa:
+  # Can only be enabled if global.datahub_standalone_consumers_enabled
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  behavior: {}
+  targetCPUUtilizationPercentage: 100
+  targetMemoryUtilizationPercentage:
+
 revisionHistoryLimit: 10
 
 image:
-  repository: linkedin/datahub-gms
+  repository: acryldata/datahub-gms
   pullPolicy: IfNotPresent
   tag:
   # Override the image's command & args with a new one.
@@ -18,6 +27,11 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+theme_v2:
+  enabled: true
+  default: true
+  toggeable: true
 
 terminationGracePeriodSeconds: 150
 
@@ -32,7 +46,7 @@ serviceAccount:
 
 serviceMonitor:
   create: false
-
+  extraLabels: {}
 
 podAnnotations: {}
   # co.elastic.logs/enabled: "true"
@@ -76,6 +90,7 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+  pathType: ImplementationSpecific
 
 # Extra labels for Deployment
 extraLabels: {}
@@ -140,6 +155,8 @@ readinessProbe:
 #This section is useful if we are installing this chart separately for testing
 # helm install datahub-gms datahub-gms/
 global:
+  imageRegistry: "docker.io"
+
   datahub_analytics_enabled: true
   graph_service_impl: elasticsearch
 
@@ -167,7 +184,11 @@ global:
     bootstrap:
       server: "broker:9092"
     schemaregistry:
-      url: "http://schema-registry:8081"
+      # GMS Implementation - `url` configured based on component context
+      type: INTERNAL
+      # Confluent Kafka Implementation
+      # type: KAFKA
+      # url: "http://schema-registry:8081"
     ## Kafka producer and consumer settings
     #producer:
     #  compressionType: snappy
@@ -201,6 +222,9 @@ global:
       portName: jmx
     gms:
       port: "8080"
+      graphql:
+        introspection:
+          enabled: 'true' # v0.13.3+
     appVersion: "1.0"
 
     systemUpdate:
@@ -225,6 +249,18 @@ global:
       # systemClientSecret:
       #  secretRef: <secret-ref>
       #  secretKey: <secret-key>
+      restApi:
+        authorization:
+          # enables authorization of reads, writes, and deletes on REST APIs
+          enabled: true
+      view:
+        authorization:
+          # search/view authorization filters
+          enabled: false
+          # recommendation settings when search/view authorization is in effect
+          recommendations:
+            # whether to restrict Most Popular entities 
+            peerGroupEnabled: true
 
     encryptionKey:
       secretRef: "encryption-key-secret"
@@ -237,6 +273,9 @@ global:
 
     ## Enables diff mode for graph writes, uses a different code path that produces a diff from previous to next to write relationships instead of wholesale deleting edges and reading
     enableGraphDiffMode: true
+
+    ## Enable stricter URN validation logic
+    strictUrnValidation: false
 
     cache:
       search:
@@ -256,6 +295,11 @@ global:
           enabled: false
           ttlSeconds: 86400
           lightningThreshold: 300
+
+    metadataChangeProposal:
+      consumer:
+        batch:
+          enabled: false
 
   hostAliases:
     - ip: "192.168.0.104"

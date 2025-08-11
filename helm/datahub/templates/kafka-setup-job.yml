@@ -55,7 +55,7 @@ spec:
       {{- end }}
       containers:
         - name: kafka-setup-job
-          image: "{{ .Values.kafkaSetupJob.image.repository }}:{{ required "Global or specific tag is required" ( .Values.kafkaSetupJob.image.tag | default .Values.global.datahub.version) }}"
+          image: {{ include "datahub.image" (dict "imageRegistry" .Values.global.imageRegistry "version" .Values.global.datahub.version "image" .Values.kafkaSetupJob.image) }}
           imagePullPolicy: {{ .Values.kafkaSetupJob.image.pullPolicy | default "IfNotPresent" }}
           {{- if .Values.kafkaSetupJob.image.command }}
           command: {{ .Values.kafkaSetupJob.image.command | toRawJson }}
@@ -74,7 +74,7 @@ spec:
             - name: MAX_MESSAGE_BYTES
               value: {{ . | quote }}
             {{- end }}
-            {{- if eq .Values.global.kafka.schemaregistry.type "INTERNAL" }}
+            {{- if or (eq .Values.global.kafka.schemaregistry.type "INTERNAL") (eq .Values.global.kafka.schemaregistry.type "AWS_GLUE") }}
             - name: USE_CONFLUENT_SCHEMA_REGISTRY
               value: "false"
             {{- else if eq .Values.global.kafka.schemaregistry.type "KAFKA" }}

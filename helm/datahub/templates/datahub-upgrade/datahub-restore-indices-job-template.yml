@@ -6,11 +6,11 @@
 apiVersion: {{ include "datahub.cronjob.apiVersion" $}}
 kind: CronJob
 metadata:
-  name: {{ .Release.Name }}-datahub-restore-indices-job-template
+  name: {{ printf "%s-datahub-restore-indices-job-template" .Release.Name | trunc 52 }}
   labels:
     {{- include "datahub.labels" . | nindent 4 }}
 spec:
-  schedule: "* * * * *"
+  schedule: {{ .Values.datahubUpgrade.restoreIndices.schedule | default "0 0 * * 0" }}
   suspend: true
   concurrencyPolicy: {{ .Values.datahubUpgrade.restoreIndices.concurrencyPolicy | default "Allow" }}
   jobTemplate:
@@ -60,7 +60,7 @@ spec:
           {{- end }}
           containers:
             - name: datahub-upgrade-job
-              image: "{{ .Values.datahubUpgrade.image.repository }}:{{ required "Global or specific tag is required" (.Values.datahubUpgrade.image.tag | default .Values.global.datahub.version) }}"
+              image: {{ include "datahub.image" (dict "imageRegistry" .Values.global.imageRegistry "version" .Values.global.datahub.version "image" .Values.datahubUpgrade.image) }}
               imagePullPolicy: {{ .Values.datahubUpgrade.image.pullPolicy | default "IfNotPresent" }}
               {{- if .Values.datahubUpgrade.restoreIndices.image.command }}
               command: {{ .Values.datahubUpgrade.restoreIndices.image.command | toRawJson }}
@@ -75,9 +75,45 @@ spec:
                 - "batchSize={{ .Values.datahubUpgrade.batchSize }}"
                 - "-a"
                 - "batchDelayMs={{ .Values.datahubUpgrade.batchDelayMs }}"
+                {{- if .Values.datahubUpgrade.restoreIndices.args.lePitEpochMs }}
+                - "-a"
+                - "lePitEpochMs={{ .Values.datahubUpgrade.restoreIndices.args.lePitEpochMs }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.gePitEpochMs }}
+                - "-a"
+                - "gePitEpochMs={{ .Values.datahubUpgrade.restoreIndices.args.gePitEpochMs }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.lastUrn }}
+                - "-a"
+                - "lastUrn={{ .Values.datahubUpgrade.restoreIndices.args.lastUrn }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.lastAspect}}
+                - "-a"
+                - "lastAspect={{ .Values.datahubUpgrade.restoreIndices.args.lastAspect }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.urnBasedPagination}}
+                - "-a"
+                - "urnBasedPagination={{ .Values.datahubUpgrade.restoreIndices.args.urnBasedPagination }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.aspectNames}}
+                - "-a"
+                - "aspectNames={{ .Values.datahubUpgrade.restoreIndices.args.aspectNames }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.urnLike}}
+                - "-a"
+                - "urnLike={{ .Values.datahubUpgrade.restoreIndices.args.urnLike }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.startingOffset}}
+                - "-a"
+                - "startingOffset={{ .Values.datahubUpgrade.restoreIndices.args.startingOffset }}"
+                {{- end}}
+                {{- if .Values.datahubUpgrade.restoreIndices.args.numThreads}}
+                - "-a"
+                - "numThreads={{ .Values.datahubUpgrade.restoreIndices.args.numThreads }}"
+                {{- end}}
               {{- end }}
               env:
-                {{- include "datahub.upgrade.env" . | nindent 16}}
+                {{- include "datahub.upgrade.env" . | nindent 16 }}
                 {{- if .Values.global.datahub.metadata_service_authentication.enabled }}
                 - name: DATAHUB_SYSTEM_CLIENT_ID
                   value: {{ .Values.global.datahub.metadata_service_authentication.systemClientId }}
@@ -101,7 +137,7 @@ spec:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
               resources:
-                {{- toYaml .Values.datahubUpgrade.restoreIndices.resources | nindent 16}}
+                {{- toYaml .Values.datahubUpgrade.restoreIndices.resources | nindent 16 }}
             {{- with .Values.datahubUpgrade.restoreIndices.extraSidecars }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

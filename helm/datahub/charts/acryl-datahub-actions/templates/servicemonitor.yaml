@@ -2,9 +2,9 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ printf "%s-%s" .Release.Name "datahub-frontend" }}
+  name: {{ include "acryl-datahub-actions.fullname" . }}
   labels:
-    {{- include "datahub-frontend.labels" . | nindent 4 }}
+    {{- include "acryl-datahub-actions.labels" . | nindent 4 }}
     {{- range $key, $val := .Values.serviceMonitor.extraLabels }}
     {{ $key }}: {{ $val | quote }}
     {{- end }}
@@ -24,5 +24,5 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/managed-by: Helm
-      app.kubernetes.io/name: datahub-frontend
+      app.kubernetes.io/name: acryl-datahub-actions
 {{- end -}}

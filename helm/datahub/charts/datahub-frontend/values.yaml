@@ -4,10 +4,31 @@
 
 replicaCount: 1
 
+hpa:
+  # If enabled, Horizontal Pod Autoscaler (HPA) will automatically scale the number of replicas based on CPU and memory utilization thresholds.
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 3
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 180
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
+
 revisionHistoryLimit: 10
 
 image:
-  repository: linkedin/datahub-frontend-react
+  repository: acryldata/datahub-frontend-react
   tag:
   pullPolicy: IfNotPresent
   # Override the image's command & args with a new one.
@@ -61,6 +82,7 @@ service:
 
 serviceMonitor:
   create: false
+  extraLabels: {}
 
 ingress:
   # className: ""
@@ -77,13 +99,14 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+  pathType: ImplementationSpecific
 
 auth:
   sessionTTLHours: "24"
 # OIDC auth based on https://datahubproject.io/docs/authentication/guides/sso/configure-oidc-react
 oidcAuthentication:
   enabled: false
-  # provider: google/okta/azure  <- choose only one
+  # provider: google/okta/azure/other  <- choose only one
 
   # clientId: your-client-id
   # clientSecret: your-client-secret
@@ -91,6 +114,8 @@ oidcAuthentication:
   # clientSecretRef:
   #   secretRef: <secret-ref>
   #   secretKey: <secret-key>
+  # only needed if provider is `other`
+  # discoveryUri: https://my-keycloak.example.com/realms/master/.well-known/openid-configuration
   # only needed if provider is `okta`
   # oktaDomain: your-okta-domain.com
 
@@ -160,52 +185,6 @@ tolerations: []
 
 affinity: {}
 
-env:
-  JMXPORT: 1099
-
-exporters:
-  jmx:
-    enabled: false
-#    image:
-#      repository: bitnami/jmx-exporter
-#      tag: 0.15.0
-#      pullPolicy: IfNotPresent
-#    config:
-#      lowercaseOutputName: true
-#      lowercaseOutputLabelNames: true
-#      rules:
-#        - pattern: ".*"
-#      startDelaySeconds: 30
-#    env: {}
-#    resources: {}
-#    path: /metrics
-#    ports:
-#      jmxxp:
-#        containerPort: 5556
-#        protocol: TCP
-#    livenessProbe:
-#      httpGet:
-#        path: /metrics
-#        port: jmxxp
-#      initialDelaySeconds: 30
-#      periodSeconds: 15
-#      timeoutSeconds: 60
-#      failureThreshold: 8
-#      successThreshold: 1
-#    readinessProbe:
-#      httpGet:
-#        path: /metrics
-#        port: jmxxp
-#      initialDelaySeconds: 30
-#      periodSeconds: 15
-#      timeoutSeconds: 60
-#      failureThreshold: 8
-#      successThreshold: 1
-#    serviceMonitor:
-#      interval: 30s
-#      scrapeTimeout: 30s
-#      scheme: http
-
 livenessProbe:
   initialDelaySeconds: 60
   periodSeconds: 30
@@ -222,6 +201,8 @@ datahub:
       buffer:
         size: "10MB"
 global:
+  imageRegistry: "docker.io"
+
   datahub_analytics_enabled: true
 
   elasticsearch:
