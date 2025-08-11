@@ -12,28 +12,65 @@ elasticsearch:
   # a master node when deploying on a single node Minikube / Kind / etc cluster.
   antiAffinity: "soft"
 
-  # # If you are running a multi-replica cluster, comment this out
+  # If you are running a multi-replica cluster, comment this out
   clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 
-  # # Shrink default JVM heap.
+  # Shrink default JVM heap.
   esJavaOpts: "-Xmx512m -Xms512m"
 
-  # # Allocate smaller chunks of memory per pod.
+  # Allocate smaller chunks of memory per pod.
   resources:
     requests:
       cpu: "100m"
-      memory: "1024Mi"
+      memory: "1024M"
     limits:
       cpu: "1000m"
-      memory: "1024Mi"
+      memory: "1024M"
 
-  # # Request smaller persistent volumes.
+  # Request smaller persistent volumes.
   # volumeClaimTemplate:
   #   accessModes: ["ReadWriteOnce"]
   #   storageClassName: "standard"
   #   resources:
   #     requests:
   #       storage: 100M
+
+opensearch:
+  enabled: false
+
+  # If you're running in production, set this to false, replicas to 3 and uncomment antiAffinity below
+  # Or alternatively if you're running production, bring your own OpenSearch
+  singleNode: true
+  # replicas: 3
+  # antiAffinity: "hard"
+
+  # By default security is enabled for OpenSearch, disable it here.
+  config:
+    opensearch.yml: |
+      plugins:
+        security:
+          disabled: true
+
+  extraEnvs:
+    - name: DISABLE_INSTALL_DEMO_CONFIG
+      value: "true"
+
+  image:
+    tag: "2.11.0"
+
+  # opensearchJavaOpts: "-Xmx512M -Xms512M"
+
+  # resources:
+  #   requests:
+  #     cpu: "1000m"
+  #     memory: "100Mi"
+
+  # Request smaller persistent volumes.
+  # persistence:
+  #   storageClass: "standard"
+  #   accessModes:
+  #     - ReadWriteOnce
+  #   size: 100M
 
 # Official neo4j chart, supports both community and enterprise editions
 # see https://neo4j.com/docs/operations-manual/current/kubernetes/ for more information
@@ -47,7 +84,7 @@ neo4j:
     acceptLicenseAgreement: "yes"
     defaultDatabase: "graph.db"
     password: "datahub"
-    # For better security, add password to neo4j-secrets k8s secret with  neo4j-username neo4j-passwordn and NEO4J_AUTH and uncomment below
+    # For better security, add password to neo4j-secrets k8s secret with: neo4j-username, neo4j-password, and NEO4J_AUTH then uncomment below
     # NEO4J_AUTH: should be composed like so: {Username}/{Password}
     # passwordFromSecret: neo4j-secrets
 
@@ -76,6 +113,8 @@ neo4j:
 
 mysql:
   enabled: true
+  image:
+    tag: 8.0.32-debian-11-r26
   auth:
     # For better security, add mysql-secrets k8s secret with mysql-root-password, mysql-replication-password and mysql-password
     existingSecret: mysql-secrets
@@ -97,6 +136,8 @@ gcloud-sqlproxy:
   existingSecret: ""
   # The key in the existing secret that stores the credentials
   existingSecretKey: ""
+  ## the name of the ServiceAccount to be used
+  serviceAccountName: ""
   # SQL connection settings
   cloudsql:
     # MySQL instances:

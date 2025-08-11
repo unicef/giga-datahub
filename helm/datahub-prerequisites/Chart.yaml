@@ -4,14 +4,18 @@ dependencies:
   name: elasticsearch
   repository: https://helm.elastic.co
   version: 7.17.3
+- condition: opensearch.enabled
+  name: opensearch
+  repository: https://opensearch-project.github.io/helm-charts
+  version: 2.18.0
 - condition: neo4j.enabled
   name: neo4j
   repository: https://helm.neo4j.com/neo4j
   version: 5.11.0
 - condition: mysql.enabled
   name: mysql
-  repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
-  version: 9.1.8
+  repository: https://charts.bitnami.com/bitnami
+  version: 9.4.9
 - condition: postgresql.enabled
   name: postgresql
   repository: https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami
@@ -34,4 +38,4 @@ maintainers:
   name: DataHub
 name: datahub-prerequisites
 type: application
-version: 0.1.8
+version: 0.1.15
