@@ -776,6 +776,20 @@ global:
       port: "8080"
       nodePort: "30001"
 
+      env:
+      - name: GRAPHQL_METRICS_ENABLED
+        value: "true"
+      - name: GRAPHQL_METRICS_FIELD_LEVEL_ENABLED
+        value: "true"
+      - name: GRAPHQL_METRICS_FIELD_LEVEL_OPERATIONS
+        value: ""
+      - name: GRAPHQL_METRICS_FIELD_LEVEL_PATH_ENABLED
+        value: "true"
+      - name: GRAPHQL_QUERY_INTROSPECTION_ENABLED
+        value: "true"
+      - name: GRAPHQL_METRICS_TRIVIAL_DATA_FETCHERS_ENABLED
+        value: "true"
+
     # Used for scheduled tasks
     timezone: "UTC"
 
