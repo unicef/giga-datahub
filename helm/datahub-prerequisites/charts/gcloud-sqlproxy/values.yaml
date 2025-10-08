@@ -202,9 +202,8 @@ lifecycleHooks: {}
 #     exec:
 #       command: ['sleep', '10']
 
-## Configure the PodDisruptionBudget
-podDisruptionBudget: |
-  maxUnavailable: 1
+## Configure the PodDisruptionBudget. Set to null to disable by default.
+podDisruptionBudget: null
 
 ## Additional container arguments
 ## Uncomment the term_timeout line for the proxy to wait your chosen time before terminating connections

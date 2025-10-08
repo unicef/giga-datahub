@@ -207,7 +207,8 @@ updateStrategy: RollingUpdate
 # This is the max unavailable setting for the pod disruption budget
 # The default value of 1 will make sure that kubernetes won't allow more than 1
 # of your pods to be unavailable during maintenance
-maxUnavailable: 1
+# Set to null to disable creation of the PodDisruptionBudget by default.
+maxUnavailable: null
 
 podSecurityContext:
   fsGroup: 1000

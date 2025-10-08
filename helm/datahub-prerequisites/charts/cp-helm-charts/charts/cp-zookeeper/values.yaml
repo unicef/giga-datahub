@@ -11,6 +11,8 @@ servers: 3
 
 ## Minimum number of servers available to ensure the availability of zookeeper service
 ## minAvailable: 2
+## Set to null to disable the PodDisruptionBudget by default.
+minAvailable: null
 
 ## Images Info
 ## ref: https://hub.docker.com/r/confluentinc/cp-zookeeper/
