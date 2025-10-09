@@ -511,9 +511,9 @@ primary:
     ## @param primary.pdb.create Enable/disable a Pod Disruption Budget creation for MySQL primary pods
     ##
     create: false
-    ## @param primary.pdb.minAvailable Minimum number/percentage of MySQL primary pods that should remain scheduled. Set to null to disable the PodDisruptionBudget by default.
+    ## @param primary.pdb.minAvailable Minimum number/percentage of MySQL primary pods that should remain scheduled
     ##
-    minAvailable: null
+    minAvailable: 1
     ## @param primary.pdb.maxUnavailable Maximum number/percentage of MySQL primary pods that may be made unavailable
     ##
     maxUnavailable: ""
@@ -885,9 +885,9 @@ secondary:
     ## @param secondary.pdb.create Enable/disable a Pod Disruption Budget creation for MySQL secondary pods
     ##
     create: false
-    ## @param secondary.pdb.minAvailable Minimum number/percentage of MySQL secondary pods that should remain scheduled. Set to null to disable the PodDisruptionBudget by default.
+    ## @param secondary.pdb.minAvailable Minimum number/percentage of MySQL secondary pods that should remain scheduled
     ##
-    minAvailable: null
+    minAvailable: 1
     ## @param secondary.pdb.maxUnavailable Maximum number/percentage of MySQL secondary pods that may be made unavailable
     ##
     maxUnavailable: ""

@@ -788,7 +788,7 @@ controller:
   pdb:
     create: false
     minAvailable: ""
-    maxUnavailable: null
+    maxUnavailable: 1
   ## Enable persistence using Persistent Volume Claims
   ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
   ##
