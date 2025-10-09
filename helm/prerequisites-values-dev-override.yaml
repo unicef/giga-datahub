@@ -17,3 +17,6 @@ elasticsearch:
     limits:
       cpu: "1000m"
       memory: "8Gi"
+
+  # Disable PodDisruptionBudget
+  maxUnavailable: null
