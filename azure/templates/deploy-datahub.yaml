@@ -30,9 +30,9 @@ jobs:
                   --timeout 1h
                   --values helm/values-override-dev-stg.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
-                  --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
-                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
+                  --set datahub-frontend.oidcAuthentication.clientId="$(azureClientIdDev)"
+                  --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantIdDev)"
+                  --set datahub-frontend.oidcAuthentication.clientSecret="$(azureClientSecretDev)"
 
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub stg

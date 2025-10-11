@@ -7,6 +7,7 @@ variables:
   deployEnv: $(DEPLOY_ENV)
   ingressHost: $(INGRESS_HOST)
   azureTenantId: $(AZURE_TENANT_ID)
-  azureTenantName: $(AZURE_TENANT_NAME)
-  azurePolicyName: $(AZURE_AUTH_POLICY_NAME)
+  azureTenantIdDev: $(AZURE_TENANT_ID_DEV)
+  azureClientIdDev: $(AZURE_CLIENT_ID_DEV)
+  azureClientSecretDev: $(AZURE_CLIENT_SECRET_DEV)
   system.debug: true
