@@ -65,14 +65,6 @@ tasks:
       - task: helm-up-prereqs
       - task: helm-up-datahub
 
-  helm-upi:
-    desc: Install/upgrade Datahub Helm chart with HTTPS ingress
-    dir: helm
-    cmds:
-      - task: k8s-prereqs
-      - task: helm-up-prereqs
-      - task: helm-up-datahub
-
   k8s-prereqs:
     internal: true
     desc: Install K8s configs/secrets
