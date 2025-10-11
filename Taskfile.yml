@@ -66,7 +66,6 @@ tasks:
       - task: helm-up-datahub
 
   k8s-prereqs:
-    internal: true
     desc: Install K8s configs/secrets
     dir: k8s
     cmds:
@@ -80,16 +79,11 @@ tasks:
     cmds:
       - >
         helm upgrade --install prerequisites datahub/datahub-prerequisites
-        --version 0.1.15
+        --version 0.2.1
         --values prerequisites-values.yaml
-        --values prerequisites-values-local-override.yaml
-        --values prerequisites-values-prd-override.yaml
         --namespace giga-datahub
         --create-namespace
-        --set postgresql.primary.readinessProbe.enabled=false
-        --set postgresql.primary.livenessProbe.enabled=false
-        --set elasticsearch.ingress.hosts[0].host={{.DATAHUB_ES_INGRESS_HOST}}
-        --set elasticsearch.replicas=1
+
 
   helm-up-datahub:
     desc: Install/upgrade Datahub
@@ -97,7 +91,7 @@ tasks:
     cmds:
       - >
         helm upgrade --install datahub datahub/datahub
-        --version 0.6.15
+        --version 0.7.0
         --values values.yaml
         --values values-override-dev-stg.yaml
         --namespace giga-datahub
