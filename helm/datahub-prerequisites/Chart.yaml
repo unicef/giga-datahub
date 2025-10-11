@@ -38,4 +38,4 @@ maintainers:
   name: DataHub
 name: datahub-prerequisites
 type: application
-version: 0.1.15
+version: 0.2.1
