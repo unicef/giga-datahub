@@ -1,7 +1,5 @@
 # Default configuration for pre-requisites to get you started
 # Copy this file and update to the configuration of choice
-global:
-  imageRegistry: public.ecr.aws
 elasticsearch:
   # set this to false, if you want to provide your own ES instance.
   enabled: true
@@ -101,16 +99,8 @@ postgresql:
   auth:
     # For better security, add postgresql-secrets k8s secret with postgres-password, replication-password and password
     existingSecret: postgresql-secrets
-  primary:
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: kubernetes.io/arch
-                  operator: NotIn
-                  values:
-                    - arm64
+  image:
+    registry: public.ecr.aws
   resources:
     requests:
       cpu: "10m"
