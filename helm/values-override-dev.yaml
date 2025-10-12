@@ -1,0 +1,13 @@
+datahub-frontend:
+  oidcAuthentication:
+    enabled: true
+    provider: azure
+    scope: "openid profile email"
+  extraEnvs:
+    - name: AUTH_VERBOSE_LOGGING
+      value: "true"
+    - name: REACT_APP_LOGO_URL
+      value: https://saunigigashare.blob.core.windows.net/assets/giga-logo-datahub.png
+    - name: REACT_APP_FAVICON_URL
+      value: https://saunigigashare.blob.core.windows.net/assets/GIGA_logo_blue.png
+

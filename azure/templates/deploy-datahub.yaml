@@ -15,12 +15,6 @@ jobs:
                 arguments: add datahub https://helm.datahubproject.io/
                 namespace: $(kubernetesNamespace)
 
-            - script: |
-              displayName: Inspect env with indices
-                kubectl -n $(kubernetesNamespace) get deploy datahub-datahub-frontend \
-                  -o jsonpath='{range $i,$e:=.spec.template.spec.containers[0].env}{printf "[%d] %s " $i $e.name}{if $e.value}{printf "= %s" $e.value}{end}{if $e.valueFrom.secretKeyRef.name}{printf " <- secret:%s key:%s" $e.valueFrom.secretKeyRef.name $e.valueFrom.secretKeyRef.key}{end}{"\n"}{end}'
-
-
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub dev
               condition: eq(variables.environment, 'dev')
@@ -34,7 +28,7 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
-                  --values helm/values-override-dev-stg.yaml
+                  --values helm/values-override-dev.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
                   --set datahub-frontend.oidcAuthentication.clientId="$(azureClientIdDev)"
                   --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantIdDev)"
@@ -53,13 +47,10 @@ jobs:
                 namespace: $(kubernetesNamespace)
                 arguments: >
                   --timeout 1h
-                  --values helm/values-override-dev-stg.yaml
-                  --values helm/values-override-stg-prd.yaml
+                  --values helm/values-override-stg.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
-                  --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
                   --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"
-                  --set datahub-frontend.extraEnvs[0].valueFrom.secretKeyRef.name="oi-datahub-secrets-$(deployEnv)"
-
+              
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub prd
               condition: eq(variables.environment, 'prd')
@@ -74,7 +65,6 @@ jobs:
                 arguments: >
                   --timeout 1h
                   --values helm/values-override-prd.yaml
-                  --values helm/values-override-stg-prd.yaml
                   --set datahub-frontend.ingress.hosts[0].host="$(ingressHost)"
                   --set datahub-frontend.oidcAuthentication.clientSecretRef.secretRef="oi-datahub-secrets-$(deployEnv)"
                   --set datahub-frontend.oidcAuthentication.azureTenantId="$(azureTenantId)"

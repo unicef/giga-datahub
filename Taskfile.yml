@@ -93,7 +93,7 @@ tasks:
         helm upgrade --install datahub datahub/datahub
         --version 0.7.0
         --values values.yaml
-        --values values-override-dev-stg.yaml
+        --values values-override-dev.yaml
         --namespace giga-datahub
         --create-namespace
         --timeout 1h
