@@ -15,6 +15,12 @@ jobs:
                 arguments: add datahub https://helm.datahubproject.io/
                 namespace: $(kubernetesNamespace)
 
+            - script: |
+              displayName: Inspect env with indices
+                kubectl -n $(kubernetesNamespace) get deploy datahub-datahub-frontend \
+                  -o jsonpath='{range $i,$e:=.spec.template.spec.containers[0].env}{printf "[%d] %s " $i $e.name}{if $e.value}{printf "= %s" $e.value}{end}{if $e.valueFrom.secretKeyRef.name}{printf " <- secret:%s key:%s" $e.valueFrom.secretKeyRef.name $e.valueFrom.secretKeyRef.key}{end}{"\n"}{end}'
+
+
             - task: HelmDeploy@0
               displayName: Helm deploy Datahub dev
               condition: eq(variables.environment, 'dev')
