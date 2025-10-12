@@ -10,13 +10,13 @@ stages:
     jobs:
       - template: create-ingress.yaml
 
-  # - stage: DeployPrerequisites
-  #   displayName: Deploy Datahub Prerequisites
-  #   dependsOn:
-  #     - CreateConfig
-  #     - CreateIngress
-  #   jobs:
-  #     - template: deploy-prereq.yaml
+  - stage: DeployPrerequisites
+    displayName: Deploy Datahub Prerequisites
+    dependsOn:
+      - CreateConfig
+      - CreateIngress
+    jobs:
+      - template: deploy-prereq.yaml
 
   - stage: DeployDatahub
     displayName: Deploy Datahub
