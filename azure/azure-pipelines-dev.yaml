@@ -3,6 +3,7 @@ trigger:
   branches:
     include:
       - dev
+      - fix/helm-dev
 
 pr: none
 
