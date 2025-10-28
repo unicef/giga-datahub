@@ -110,3 +110,7 @@ jobs:
                 command: apply
                 useConfigurationFile: true
                 configuration: k8s/datahub-stg-prd.yaml
+                arguments: >
+                  --prune
+                  -l app.kubernetes.io/part-of=giga-dataops-platform
+                  --prune-allowlist=policy/v1/PodDisruptionBudget
