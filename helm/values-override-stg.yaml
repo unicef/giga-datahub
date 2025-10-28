@@ -3,19 +3,22 @@ datahub-frontend:
     enabled: true
     provider: azure
     clientSecretRef:
-      secretRef: ""
+      secretRef: "oi-datahub-secrets-stg"
       secretKey: AZURE_CLIENT_SECRET
     azureTenantId: ""
     scope: "openid profile email"
   extraEnvs:
-    - name: AUTH_OIDC_CLIENT_ID
-      valueFrom:
-        secretKeyRef:
-          name: oi-datahub-secrets
-          key: AZURE_CLIENT_ID
     - name: AUTH_VERBOSE_LOGGING
       value: "true"
     - name: REACT_APP_LOGO_URL
       value: https://saunigigashare.blob.core.windows.net/assets/giga-logo-datahub.png
     - name: REACT_APP_FAVICON_URL
       value: https://saunigigashare.blob.core.windows.net/assets/GIGA_logo_blue.png
+
+datahub-gms:
+  replicaCount: 2
+
+global:
+  elasticsearch:
+    host: elasticsearch-master-headless
+  datahub_standalone_consumers_enabled: true  # Enable standalone mode to allow multiple GMS instances with managed ingestion

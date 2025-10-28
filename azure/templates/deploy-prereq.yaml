@@ -23,7 +23,7 @@ jobs:
                 command: upgrade
                 chartType: Name
                 chartName: datahub/datahub-prerequisites
-                chartVersion: 0.1.15
+                chartVersion: 0.2.1
                 releaseName: prerequisites
                 namespace: $(kubernetesNamespace)
                 valueFile: helm/prerequisites-values.yaml
@@ -37,7 +37,7 @@ jobs:
                 command: upgrade
                 chartType: Name
                 chartName: datahub/datahub-prerequisites
-                chartVersion: 0.1.15
+                chartVersion: 0.2.1
                 releaseName: prerequisites
                 namespace: $(kubernetesNamespace)
                 valueFile: helm/prerequisites-values.yaml

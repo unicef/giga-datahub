@@ -19,5 +19,9 @@ elasticsearch:
       cpu: "1000m"
       memory: "3G"
 
+  esConfig:
+    elasticsearch.yml: |
+      path.repo: ["/tmp/giga"]
+
   # Disable PodDisruptionBudget
   maxUnavailable: null

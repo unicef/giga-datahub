@@ -1,9 +1,0 @@
-elasticsearch:
-  ingress:
-    enabled: true
-    className: traefik
-    pathtype: Prefix
-    hosts:
-      - host: ""
-        paths:
-          - path: /
