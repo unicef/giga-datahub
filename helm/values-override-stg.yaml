@@ -15,10 +15,7 @@ datahub-frontend:
     - name: REACT_APP_FAVICON_URL
       value: https://saunigigashare.blob.core.windows.net/assets/GIGA_logo_blue.png
 
-datahub-gms:
-  replicaCount: 2
-
 global:
   elasticsearch:
     host: elasticsearch-master-headless
-  datahub_standalone_consumers_enabled: true  # Enable standalone mode to allow multiple GMS instances with managed ingestion
+  datahub_standalone_consumers_enabled: false

@@ -1,0 +1,22 @@
+elasticsearch:
+  enabled: true
+  replicas: 1
+  minimumMasterNodes: 1
+  antiAffinity: "soft"
+
+  esJavaOpts: "-Xmx4G -Xms4G"
+
+  resources:
+    requests:
+      cpu: "300m"
+      memory: "8Gi"
+    limits:
+      cpu: "1000m"
+      memory: "8Gi"
+
+  esConfig:
+    elasticsearch.yml: |
+      path.repo: ["/tmp/giga"]
+
+  # Disable PodDisruptionBudget
+  maxUnavailable: null

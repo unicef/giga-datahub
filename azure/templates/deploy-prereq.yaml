@@ -30,9 +30,23 @@ jobs:
                 arguments: --values helm/prerequisites-values-dev-override.yaml
 
             - task: HelmDeploy@0
-              displayName: Deploy Datahub stg/prd Prerequisites
+              displayName: Deploy Datahub stg Prerequisites
               enabled: true
-              condition: or(eq(variables.environment, 'stg'), eq(variables.environment, 'prd'))
+              condition: eq(variables.environment, 'stg')
+              inputs:
+                command: upgrade
+                chartType: Name
+                chartName: datahub/datahub-prerequisites
+                chartVersion: 0.2.1
+                releaseName: prerequisites
+                namespace: $(kubernetesNamespace)
+                valueFile: helm/prerequisites-values.yaml
+                arguments: --values helm/prerequisites-values-stg-override.yaml
+
+            - task: HelmDeploy@0
+              displayName: Deploy Datahub prd Prerequisites
+              enabled: true
+              condition: eq(variables.environment, 'prd')
               inputs:
                 command: upgrade
                 chartType: Name
