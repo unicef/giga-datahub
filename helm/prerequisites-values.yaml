@@ -100,7 +100,9 @@ postgresql:
     # For better security, add postgresql-secrets k8s secret with postgres-password, replication-password and password
     existingSecret: postgresql-secrets
   image:
-    registry: public.ecr.aws
+    registry: uniappsoigiga.azurecr.io
+    image: bitnami/postgresql
+    tag: 14.3.0-debian-10-r8
   resources:
     requests:
       cpu: "10m"
@@ -162,8 +164,9 @@ cp-helm-charts:
 kafka:
   enabled: true
   image:
-    registry: public.ecr.aws
+    registry: uniappsoigiga.azurecr.io
     repository: bitnami/kafka
+    tag: 3.6.1-debian-12-r12
   listeners:
     client:
       protocol: PLAINTEXT
@@ -220,7 +223,7 @@ kafka:
   zookeeper:
     enabled: true
     image:
-      registry: public.ecr.aws
+      registry: uniappsoigiga.azurecr.io
       repository: bitnami/zookeeper
       tag: 3.9.1-debian-12-r15
 
@@ -234,4 +237,4 @@ kafka:
     pdb:
       # Disable PodDisruptionBudget by default
       maxUnavailable: null
-    
+
